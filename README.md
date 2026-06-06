@@ -40,3 +40,18 @@ lockout # Logout
 lockout -s 1000 # Sleep for 1Second or 1000ms
 ```
 	* Sleeps for specified time until logout
+
+### Serve tool
+- Create a server from a machine
+- Start a server at 0.0.0.0:8080/ from the . folder
+```bash
+serve
+```
+	* Serves files from 8080 from the . folder
+```bash
+serve --port 443 --cors --https --folder \"servethething\"
+```
+	* serves from port 443
+	* adds CORS Headers
+	* uses https SSL
+	* serves from the servethething folder

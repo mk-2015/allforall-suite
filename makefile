@@ -32,7 +32,14 @@ else
     endif
 endif
 
-.PHONY: all setup build_subprojects deploy clean
+.PHONY: all setup build_subprojects deploy clean deps
+
+deps: 
+	@for dir in $(SUBPROJECTS); do \
+		if [ -f "$$dir/Makefile" ] || [ -f "$$dir/makefile" ]; then \
+			$(MAKE) -C $$dir deps; \
+		fi; \
+	done
 
 all: setup build_subprojects deploy
 

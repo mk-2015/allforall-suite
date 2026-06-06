@@ -1,24 +1,33 @@
-SRC   := src
-BIN   := bin
-OBJ   := obj
+SRC       := src
+BIN       := bin
+OBJ       := obj
+INC       := include
 
 CC        := g++
-CCFLAGS   := -Wall -Wextra -std=c++17
+CCFLAGS   := -Wall -Wextra -std=c++17 -I$(INC)
 LINKFLAGS := 
 
-SOURCES := $(sort $(wildcard $(SRC)/*.cpp))
+SOURCES   := $(wildcard $(SRC)/*.cpp)
+OBJECTS   := $(patsubst $(SRC)/%.cpp, $(OBJ)/%.o, $(SOURCES))
+TARGETS   := $(patsubst $(SRC)/%.cpp, $(BIN)/%, $(SOURCES))
 
-.PHONY: all clean
+.PHONY: all clean deps
 
-all: 
-	@for file in $(SOURCES); do \
-		filename=$$(basename "$$file" .cpp); \
-		echo " [CC] $$file"; \
-		$(CC) $(CCFLAGS) -c "$$file" -o $(OBJ)/"$$filename".o || exit 1; \
-		$(CC) $(OBJ)/"$$filename".o $(LINKFLAGS) -o $(BIN)/"$$filename" || exit 1; \
-	done
-	
-	@rm -rf $(OBJ) 
+all: $(TARGETS)
+
+deps:
+	@mkdir -p $(INC)
+	curl -L https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h -o $(INC)/httplib.h
+
+$(BIN)/%: $(OBJ)/%.o
+	@mkdir -p $(BIN)
+	@echo " [LINK] $< -> $@"
+	$(CC) $< $(LINKFLAGS) -o $@
+
+$(OBJ)/%.o: $(SRC)/%.cpp
+	@mkdir -p $(OBJ)
+	@echo " [CC] $<"
+	$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:
-	rm -rf $(BIN)
+	rm -rf $(BIN) $(OBJ)
