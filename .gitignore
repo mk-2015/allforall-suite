@@ -1,0 +1,22 @@
+# --- Compiled Binaries ---
+*.exe
+*.out
+*.app
+alltools/nothing
+alltools/lockout
+alltools/serve
+
+*.o
+*.obj
+*.a
+*.lib
+*.so
+*.dll
+
+cert.pem
+key.pem
+
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
