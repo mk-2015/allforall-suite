@@ -17,15 +17,15 @@
 ```bash
 nothing
 ```
-	* Does nothing.
-	* Thats it, don't expect more.
+* Does nothing.
+* Thats it, don't expect more.
 	
 - Sleeping mode:
 ```bash
 nothing -s 1000 # Sleeps for 1 second or 1000 Milliseconds.
 ```
-	* Sleeps while doing nothing
-	* Thats it, again.
+* Sleeps while doing nothing
+* Thats it, again.
 	
 ### Lockout tool
 - Logout from a machine
@@ -33,13 +33,13 @@ nothing -s 1000 # Sleeps for 1 second or 1000 Milliseconds.
 ```bash
 lockout # Logout
 ```
-	* Logs out of the machine with specified API of the platform
-	* Cross-platform
+* Logs out of the machine with specified API of the platform
+* Cross-platform
 - Sleep mode:
 ```bash
 lockout -s 1000 # Sleep for 1Second or 1000ms
 ```
-	* Sleeps for specified time until logout
+* Sleeps for specified time until logout
 
 ### Serve tool
 - Create a server from a machine
@@ -47,11 +47,11 @@ lockout -s 1000 # Sleep for 1Second or 1000ms
 ```bash
 serve
 ```
-	* Serves files from 8080 from the . folder
+* Serves files from 8080 from the . folder
 ```bash
 serve --port 443 --cors --https --folder \"servethething\"
 ```
-	* serves from port 443
-	* adds CORS Headers
-	* uses https SSL
-	* serves from the servethething folder
+* serves from port 443
+* adds CORS Headers
+* uses https SSL
+* serves from the servethething folder
