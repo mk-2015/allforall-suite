@@ -41,6 +41,7 @@ int main(int argc, char* argv[]) {
         if (arg == "-h" || arg == "--help") {
             std::cout << "-h or --help  := help menu\n";
             std::cout << "-s or --sleep := sleep in milliseconds\n";
+			return 0;
         } else if (arg == "-s" || arg == "--sleep") {
             if (i + 1 < argc) { 
                 try {
