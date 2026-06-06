@@ -1,10 +1,6 @@
-# --- Compiled Binaries ---
 *.exe
 *.out
 *.app
-alltools/nothing
-alltools/lockout
-alltools/serve
 
 *.o
 *.obj
