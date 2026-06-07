@@ -108,3 +108,25 @@ serve --port 443 --cors --https --folder \"servethething\"
 	
 	* -c or --copyright flag:
 		* shows copyright.
+		
+### fwipe tool
+- File wiper utility
+- Flags:
+	* -f or --file <FILE> Flag:
+		- Required
+		- Specifiy file to delete
+		
+	* -h or --help Flag:
+		- Not Required
+		- Bring up help menu
+		
+### dwipe tool
+- Directory wiper utility 
+- Flags:
+	* -d or --dir Flag:
+		- Required
+		- Specifiy directory to delete
+		
+	* -h or -help Flag:
+		- Not Required
+		- Bring up help menu
