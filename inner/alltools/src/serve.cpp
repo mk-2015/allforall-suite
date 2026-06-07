@@ -86,17 +86,18 @@ int main(int argc, char* argv[])
 #endif
     svr->set_mount_point("/", folder);
     
-    if (cors_enabled) {
-        svr->set_filter([](const httplib::Request& req, httplib::Response& res) {
+	if (cors_enabled) {
+        svr->set_pre_routing_handler([](const httplib::Request& req, httplib::Response& res) {
             res.set_header("Access-Control-Allow-Origin", "*");
             res.set_header("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
             res.set_header("Access-Control-Allow-Headers", "Content-Type, Authorization");
             
             if (req.method == "OPTIONS") {
                 res.status = 204;
-                return httplib::FilterMode::Break;
+                return httplib::Server::HandlerResponse::Handled;
             }
-            return httplib::FilterMode::KeepContent;
+            
+            return httplib::Server::HandlerResponse::Unhandled;
         });
     }
 	

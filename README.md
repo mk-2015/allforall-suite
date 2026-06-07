@@ -1,12 +1,42 @@
 # WARNING
-- ***This project is still in devlopment! Dont use in production!***
-- ***I am not responsible to damages that accours if production is damaged!***
+- ***This project is still in development! Dont use in production!***
+- ***I am not responsible to damages that occours if production is damaged!***
 
 # All For All
 - Is an opensource tool library for os-admins
 - Is written in C++ for blazing fast applications and code readibility. So, other people can join.
 - Is a massive toolkit (SOON...)
 
+- build:
+	* Support:
+		- 1. Windows 
+		- 2. Linux
+		- 3. BSD
+		- 4. MacOs (Never)
+	* Requirements:
+		- 1. internet
+		- 2. gcc and make
+	* steps:
+		- step 1: clone the repo:
+			```bash
+			git clone --depth 1 https://github.com/mk-2015/allforall-suite
+			```
+		- step 2: cd and build:
+			```bash
+			cd allforall-suite && make deps install # Note make install executes make all before copying.
+			```
+		- step 3: reboot to guarantee max package changes:
+			* linux/BSD:
+			```bash
+			sudo reboot
+			```
+			
+			* windows:
+			```cmd
+			shutdown /r /t 0
+			```
+		- step 4: enjoy!
+		
 ## alltools
 - Binary tools for quick code writing in bash or batch
 - Written in cpp
@@ -55,3 +85,26 @@ serve --port 443 --cors --https --folder \"servethething\"
 * adds CORS Headers
 * uses https SSL
 * serves from the servethething folder
+
+### Cursor tool
+- Also known as ```'spinner'``` makes a cool spinner for loading, but you don't know the time it will end at. Mouth full. 
+- Bunch of flags:
+	* -d or --d flag:
+		* Requires a millisecond argument
+		* Time to sleep before next character
+	* --cmd "command to /run" flag:
+		* Is required
+		* Command to run until finished.
+	* -th or --theme flag:
+		* Is not required
+		* Default theme is classic
+		* Themes:
+			- classic
+			- num-wheel
+			- ark
+			- updot
+	* -v or --verbose flag:
+		* Makes everything verbose
+	
+	* -c or --copyright flag:
+		* shows copyright.
