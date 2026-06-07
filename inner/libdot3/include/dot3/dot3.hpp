@@ -12,7 +12,7 @@
 #include <set>
 #include <stack>
 
-namespace dothree::Regex {
+namespace dotthree::Regex {
 
 enum StateType {
     MATCH_CHAR,

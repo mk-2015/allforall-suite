@@ -1,7 +1,9 @@
 #include <dot3/dot3.hpp>
 #include <dot3/dot3.h>
+#include <cstring>
+#include <new>
 
-namespace dothree::Regex {
+namespace dotthree::Regex {
 
 regex::regex(std::string RegexString) : regexString(std::move(RegexString)) {
     std::string explicitConcat = "";
@@ -161,7 +163,6 @@ void regex::AddState(std::shared_ptr<State> s, std::set<std::shared_ptr<State>>&
     if (!s || currentStates.count(s)) return;
     
     if (s->type == SPLIT) {
-        // Instantly follow free paths (epsilon-transitions)
         AddState(s->out, currentStates);
         AddState(s->out1, currentStates);
     } else {
@@ -197,24 +198,20 @@ bool regex::Parse(std::string StringToParse) {
 }
 }
 
-#include "regex.h"
-#include <cstring>
-#include <new>
-
 extern "C" 
 {
     void* NewRegexHandler(const char* regexString)
     {
         if (!regexString) return nullptr;
         
-        return static_cast<void*>(new(std::nothrow) Regex::regex(std::string(regexString)));
+        return static_cast<void*>(new(std::nothrow) dotthree::Regex::regex(std::string(regexString)));
     }
 
     void CloseRegexHandler(void* handler)
     {
         if (handler) 
         {
-            delete static_cast<Regex::regex*>(handler);
+            delete static_cast<dotthree::Regex::regex*>(handler);
         }
     }
 
@@ -222,6 +219,6 @@ extern "C"
     {
         if (!handle || !StringToParse) return false;
         
-        return static_cast<Regex::regex*>(handle)->Parse(std::string(StringToParse));
+        return static_cast<dotthree::Regex::regex*>(handle)->Parse(std::string(StringToParse));
     }
 }
