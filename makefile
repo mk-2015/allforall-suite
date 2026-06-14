@@ -77,7 +77,7 @@ setup:
 build_subprojects:
 	@for dir in $(SUBPROJECTS); do \
 		if [ -f "$$dir/Makefile" ] || [ -f "$$dir/makefile" ]; then \
-			$(MAKE) -C $$dir; \
+			$(MAKE) -C $$dir all; \
 		fi; \
 		if [ -f "$$dir/.project" ]; then \
 			MODE=$$(cat $$dir/.project | tr -d "[:space:]'"); \

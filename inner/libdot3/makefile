@@ -21,8 +21,8 @@ ifeq ($(OS),Windows_NT)
     TARGET_DYLIB  := $(DYNAMIC_WINDOWS_LIB)
     TARGET_STATIC := $(STATIC_WINDOWS_LIB)
     LDFLAGS       := -shared
-    CLEAN_CMD     := if exist $(OBJ) rmdir /s /q $(OBJ) && if exist $(LIB) rmdir /s /q $(LIB)
-    MKDIR_CMD     := if not exist $(OBJ) mkdir $(OBJ) && if not exist $(OBJ_STATIC) mkdir $(OBJ_STATIC) && if not exist $(OBJ_DYNAMIC) mkdir $(OBJ_DYNAMIC) && if not exist $(LIB) mkdir $(LIB) && if not exist $(SRC) mkdir $(SRC) && if not exist $(INCLUDE) mkdir $(INCLUDE)
+    CLEAN_CMD     := rm -rf $(OBJ) $(LIB)
+    MKDIR_CMD     := mkdir -p $(INCLUDE) $(SRC) $(LIB) $(OBJ) $(OBJ_STATIC) $(OBJ_DYNAMIC)
 else
     TARGET_DYLIB  := $(DYNAMIC_LINUX_LIB)
     TARGET_STATIC := $(STATIC_LINUX_LIB)
@@ -36,9 +36,12 @@ SRCS := $(wildcard $(SRC)/*.cpp)
 OBJS_STATIC  := $(patsubst $(SRC)/%,$(OBJ_STATIC)/%,$(SRCS:.cpp=.o))
 OBJS_DYNAMIC := $(patsubst $(SRC)/%,$(OBJ_DYNAMIC)/%,$(SRCS:.cpp=.o))
 
-.PHONY: all clean directories static dynamic
+.PHONY: all clean directories static dynamic deps
 
-all: directories static dynamic
+deps:
+    # None
+
+all: directories static dynamic deps
 
 directories:
 	@$(MKDIR_CMD)

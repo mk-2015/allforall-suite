@@ -1,9 +1,13 @@
 #include<dot3/str3.hpp>
+#include<utility>
+#include<ostream>
+#include<cstddef>
 
 namespace dotthree::Strings 
 {
-    BetterString::BetterString(std::string InputString)
-		: InternalString(std::move(InputString)) {}
+    BetterString::BetterString(std::string InputString) : InternalString(std::move(InputString)) {
+		length = InternalString.length();
+	}
 		
     char& BetterString::operator[](size_t index) {
         return InternalString[index];
@@ -34,4 +38,57 @@ namespace dotthree::Strings
 		return os;
 	}
 
+	std::string BetterString::ins() {
+		return InternalString;
+	}
+
+	/*
+	BetterString& BetterString::operator=(const std::string& other) {
+		InternalString = other; 
+		length = other.length();
+
+		return *this;
+	}*/
+
+	int BetterString::toint() {
+		try {
+			return std::stoi(InternalString);
+		} catch (const std::invalid_argument& e) {
+			return 0;
+		} catch (const std::out_of_range& e) {
+			return 0;
+		}
+	}
+
+	unsigned int BetterString::touint() {
+		try {
+			return static_cast<unsigned int>(std::stoul(InternalString));
+		} catch (const std::invalid_argument& e) {
+			return 0;
+		} catch (const std::out_of_range& e) {
+			return 0;
+		}
+	}
+
+	BetterString& BetterString::operator=(const BetterString& other) {
+		if (this != &other) {
+			InternalString = other.InternalString;
+			length = other.length;
+		}
+		else if (this == &other) {
+			InternalString = other.InternalString;
+			length = other.length;
+		}
+
+		return *this;
+	}
+
+	dotthree::Strings::BetterString cut(std::string s) {
+        return dotthree::Strings::BetterString(s);
+    }
+
+	std::string uncut(dotthree::Strings::BetterString s) {
+        return s.ins();
+    }
+	
 }

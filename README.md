@@ -130,3 +130,6 @@ serve --port 443 --cors --https --folder \"servethething\"
 	* -h or -help Flag:
 		- Not Required
 		- Bring up help menu
+
+## libdot3
+- See '[libdot3 docs](./inner/libdot3/README.md)'
