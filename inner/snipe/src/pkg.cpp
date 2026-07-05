@@ -169,7 +169,7 @@ bool RunSetupScript(const fs::path& packageDir)
         return false;
     }
 
-    std::string command = "PKGDIR=" + QuoteForShell(packageDir.string()) + " " + QuoteForShell(python) + " setup.py install";
+    std::string command = "PKG=" + QuoteForShell(packageDir.string()) + " " + QuoteForShell(python) + " setup.py install";
     std::println("[SNIPE] Running setup.py in {}", packageDir.string());
     return RunCommandInDirectory(packageDir, command);
 }
@@ -588,7 +588,7 @@ int ExecTool(const std::string& packageName, const std::string& packageVersion, 
         return -2;
     }
 
-    std::string command = QuoteForShell(toolPath.string()) + " " + arguments;
+    std::string command = "PKG=" + QuoteForShell(packageDir.string()) + " " + QuoteForShell(toolPath.string()) + " " + arguments;
     int rc = std::system(command.c_str());
     if (rc != 0)
     {
