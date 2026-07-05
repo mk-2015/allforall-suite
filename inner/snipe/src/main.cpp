@@ -10,6 +10,19 @@ namespace fs = std::filesystem;
 
 #define SNIPE_VERSION "0.0.1"
 
+void PrintHelp()
+{
+    std::println("Usage: snipe <command> [arguments]");
+    std::println("");
+    std::println("Commands:");
+    std::println("  init                          Initialize the local Snipe directory");
+    std::println("  list                          List installed packages");
+    std::println("  install <name> <version>      Install a package");
+    std::println("  remove <name> <version>       Remove an installed package");
+    std::println("  exec <name> <version> <tool> [args...]  Run a tool from an installed package");
+    std::println("  help                          Show this help message");
+}
+
 int RunInitlization() 
 {
     fs::path installDir = GetSnipeInstallDir();
@@ -154,20 +167,27 @@ int main(int argc, const char *argv[])
 {
     if (argc < 2)
     {
-        std::println(std::cerr, "Usage: snipe [command]");
-        std::println(std::cerr, "Available commands: init, list, install, remove");
+        PrintHelp();
         return 1;
     }
 
     std::string_view command = argv[1];
 
+    if (command == "help" || command == "--help" || command == "-h")
+    {
+        PrintHelp();
+        return 0;
+    }
+
     if (command == "init") 
     {
         return RunInitlization();
-    } else if (command == "list") 
+    }
+    else if (command == "list") 
     {
         return ListPackages();
-    } else if (command == "install") 
+    }
+    else if (command == "install") 
     {
         if (argc < 4) 
         {
@@ -187,7 +207,8 @@ int main(int argc, const char *argv[])
 
         std::println("[SNIPE] Successfully installed package {} version {}.", packageName, packageVersion);
         return 0;
-    } else if (command == "remove")
+    }
+    else if (command == "remove")
     {
         if (argc < 4)
         {
@@ -207,8 +228,15 @@ int main(int argc, const char *argv[])
 
         std::println("[SNIPE] Successfully removed package {} version {}.", packageName, packageVersion);
         return 0;
-    } else if (command == "exec") 
+    }
+    else if (command == "exec") 
     {
+        if (argc < 5)
+        {
+            std::println(std::cerr, "Usage: snipe exec <package_name> <package_version> <tool_name> [args...]");
+            return 1;
+        }
+
         std::string packageName = argv[2];
         std::string packageVersion = argv[3];
         std::string packageTool = argv[4];
@@ -219,22 +247,20 @@ int main(int argc, const char *argv[])
             toolArguments += argv[i];
         }
 
-        int execResult = ExecTool(
-            packageName,
-            packageVersion,
-            packageTool,
-            toolArguments
-        );
+        int execResult = ExecTool(packageName, packageVersion, packageTool, toolArguments);
         
         if (execResult != 0)
         {
             std::println(std::cerr, "[SNIPE] Failed to execute tool {} in package {} version {}. Error code: {}", packageTool, packageName, packageVersion, execResult);
             return execResult;
         }
+
+        return 0;
     }
     else 
     {
         std::println(std::cerr, "Error: Unknown command '{}'", command);
+        std::println(std::cerr, "Run 'snipe help' to see the available commands.");
     }
     return 1;
 }

@@ -69,6 +69,14 @@ lockout # Logout
 ```bash
 lockout -s 1000 # Sleep for 1Second or 1000ms
 ```
+- Shudown mode:
+```bash
+lockout -shut
+```
+or
+```bash
+lockout --shutdown
+```
 * Sleeps for specified time until logout
 
 ### Serve tool

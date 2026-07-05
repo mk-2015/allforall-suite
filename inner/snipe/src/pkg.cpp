@@ -169,7 +169,7 @@ bool RunSetupScript(const fs::path& packageDir)
         return false;
     }
 
-    std::string command = QuoteForShell(python) + " setup.py install";
+    std::string command = "PKGDIR=" + QuoteForShell(packageDir.string()) + " " + QuoteForShell(python) + " setup.py install";
     std::println("[SNIPE] Running setup.py in {}", packageDir.string());
     return RunCommandInDirectory(packageDir, command);
 }
@@ -533,7 +533,6 @@ int DownloadPackage(const std::string& packageName, const std::string& packageVe
         return -6;
     }
 
-    UnmarkPackageInstalling(packageName);
     UnmarkPackageInstalling(packageName);
     std::println("[SNIPE] All repositories failed.");
     return -3;

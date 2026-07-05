@@ -16,14 +16,29 @@
     #include <cstdlib>
 #endif
 
-bool terminate_session() {
+bool terminate_session(int shutdown_flag) {
 #ifdef _WIN32
+    if (shutdown_flag) {
+        if (ExitWindowsEx(EWX_SHUTDOWN | EWX_FORCEIFHUNG, 0)) {
+            return true;
+        }
+    } else {
+        if (ExitWindowsEx(EWX_LOGOFF | EWX_FORCEIFHUNG, 0)) {
+            return true;
+        }
+    }
     if (ExitWindowsEx(EWX_LOGOFF | EWX_FORCEIFHUNG, 0)) {
         return true;
     }
     return false;
 
 #elif defined(__linux__) || defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__)
+    if (shutdown_flag) {
+        if (std::system("sudo shutdown -h now") == 0) {
+            return true;
+        }
+    }
+
     if (std::getenv("XDG_SESSION_ID") != nullptr) {
         std::string session_id = std::getenv("XDG_SESSION_ID");
         std::string cmd = "loginctl terminate-session " + session_id + " 2>/dev/null";
@@ -69,7 +84,8 @@ int main(int argc, char* argv[]) {
     
 	int is_sleep = 0;
 	double sleep_time = 0.0;
-		
+	int shutdown = 0;
+
 	for (int i = 1; i < argc; i++)
 	{
 		std::string_view arg = argv[i];
@@ -82,6 +98,11 @@ int main(int argc, char* argv[]) {
 				sleep_time = std::stod(argv[++i]);
 			}
 		}
+
+        if (arg == "-shut" || arg == "--shutdown")
+        {
+            shutdown = 1;
+        }
 		
 		if (arg == "-h"  || arg == "--help")
 		{
@@ -91,7 +112,7 @@ int main(int argc, char* argv[]) {
 	
 	if(is_sleep == 1 && sleep_time < 0.0) _sleep(sleep_time);
 	
-    if (terminate_session()) {
+    if (terminate_session(shutdown)) {
         return 0;
     }
 
