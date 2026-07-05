@@ -2,7 +2,9 @@
 #include<filesystem>
 #include<string>
 #include<iostream>
+#include<limits>
 #include<cmp.hpp>
+#include<pkg.hpp>
 
 namespace fs = std::filesystem;
 
@@ -153,7 +155,7 @@ int main(int argc, const char *argv[])
     if (argc < 2)
     {
         std::println(std::cerr, "Usage: snipe [command]");
-        std::println(std::cerr, "Available commands: init");
+        std::println(std::cerr, "Available commands: init, list, install, remove");
         return 1;
     }
 
@@ -165,8 +167,74 @@ int main(int argc, const char *argv[])
     } else if (command == "list") 
     {
         return ListPackages();
+    } else if (command == "install") 
+    {
+        if (argc < 4) 
+        {
+            std::println(std::cerr, "Usage: snipe install <package_name> <package_version>");
+            return 1;
+        }
+
+        std::string packageName = argv[2];
+        std::string packageVersion = argv[3];
+
+        int installResult = InstallPackage(packageName, packageVersion);
+        if (installResult != 0) 
+        {
+            std::println(std::cerr, "[SNIPE] Failed to install package {} version {}. Error code: {}", packageName, packageVersion, installResult);
+            return installResult;
+        }
+
+        std::println("[SNIPE] Successfully installed package {} version {}.", packageName, packageVersion);
+        return 0;
+    } else if (command == "remove")
+    {
+        if (argc < 4)
+        {
+            std::println(std::cerr, "Usage: snipe remove <package_name> <package_version>");
+            return 1;
+        }
+
+        std::string packageName = argv[2];
+        std::string packageVersion = argv[3];
+
+        int removeResult = RemovePackage(packageName, packageVersion);
+        if (removeResult != 0)
+        {
+            std::println(std::cerr, "[SNIPE] Failed to remove package {} version {}. Error code: {}", packageName, packageVersion, removeResult);
+            return removeResult;
+        }
+
+        std::println("[SNIPE] Successfully removed package {} version {}.", packageName, packageVersion);
+        return 0;
+    } else if (command == "exec") 
+    {
+        std::string packageName = argv[2];
+        std::string packageVersion = argv[3];
+        std::string packageTool = argv[4];
+        std::string toolArguments;
+        for (int i = 5; i < argc; ++i) 
+        {
+            toolArguments += " ";
+            toolArguments += argv[i];
+        }
+
+        int execResult = ExecTool(
+            packageName,
+            packageVersion,
+            packageTool,
+            toolArguments
+        );
+        
+        if (execResult != 0)
+        {
+            std::println(std::cerr, "[SNIPE] Failed to execute tool {} in package {} version {}. Error code: {}", packageTool, packageName, packageVersion, execResult);
+            return execResult;
+        }
     }
-    
-    std::println(std::cerr, "Error: Unknown command '{}'", command);
+    else 
+    {
+        std::println(std::cerr, "Error: Unknown command '{}'", command);
+    }
     return 1;
 }

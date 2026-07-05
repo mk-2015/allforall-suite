@@ -48,4 +48,4 @@ https://repo2.tld/ -- pkg2 -- version
 ```
 
 ##### How the user will use .deps
-- command:`snipe install package[INSTALLOPT] --version:1.19.2`
+- command:`snipe install package 1.19.2`

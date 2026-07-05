@@ -1,12 +1,13 @@
 CXX      := g++
 INCLUDE  := include
 CXXFLAGS := -Wall -Wextra -std=c++23 -I$(INCLUDE) -DCPPHTTPLIB_OPENSSL_SUPPORT
+LDLIBS   :=
 ifeq ($(OS),Windows_NT)
-    CXXFLAGS += -lcrypt32
+    LDLIBS += -lssl -lcrypto -lws2_32 -lcrypt32 -lwsock32
 else
     UNAME_S := $(shell uname -s)
     ifeq ($(UNAME_S),Linux)
-        CXXFLAGS += -lcrypto -lssl
+        LDLIBS += -lcrypto -lssl -pthread
     endif
 endif
 SRC_DIR  := src
@@ -24,7 +25,7 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	@mkdir $(BIN_DIR) 2>&1 | true || true
 	@echo " [LINK] $(TARGET)"
-	@$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET) -lstdc++exp
+	@$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET) $(LDLIBS) -lstdc++exp
 
 $(OBJ_DIR)/%.o: $(SRC_DIR)/%.cpp
 	@mkdir $(OBJ_DIR) 2>&1 | true || true
