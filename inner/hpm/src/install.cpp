@@ -95,10 +95,59 @@ bool hpm_install_packages(const std::vector<std::string>& pkglist) {
 
         for (const auto& named_pkg : config.packages) {
             std::string archive_path = (build_dir / (named_pkg.name + ".zip")).string();
+            std::string sig_path = archive_path + ".sig";
+            
             printf("===> Downloading %s from %s...\n", named_pkg.name.c_str(), named_pkg.url.c_str());
 
             if (!download_file(named_pkg.url, archive_path)) {
                 hpm_fail((int)NULL, "Failed to download package archive '%s' from %s\n", named_pkg.name.c_str(), named_pkg.url.c_str());
+                download_and_extract_success = false;
+                break;
+            }
+
+            // Download signature file
+            std::string sig_url = named_pkg.url + ".sig";
+            printf("===> Downloading package signature for %s...\n", named_pkg.name.c_str());
+            
+            if (!download_file(sig_url, sig_path)) {
+                hpm_fail((int)NULL, "Security Error: Failed to download signature file for '%s'. Aborting installation.\n", named_pkg.name.c_str());
+                download_and_extract_success = false;
+                break;
+            }
+
+            // Read archive bytes into memory
+            std::vector<unsigned char> file_data;
+            {
+                std::ifstream file(archive_path, std::ios::binary | std::ios::ate);
+                std::streamsize size = file.tellg();
+                file.seekg(0, std::ios::beg);
+                file_data.resize(size);
+                if (!file.read((char*)file_data.data(), size)) {
+                    hpm_fail((int)NULL, "Error reading package archive into memory for verification.\n");
+                    download_and_extract_success = false;
+                    break;
+                }
+            }
+
+            // Read signature bytes into memory
+            std::vector<unsigned char> signature_data;
+            {
+                std::ifstream sig_file(sig_path, std::ios::binary | std::ios::ate);
+                std::streamsize sig_size = sig_file.tellg();
+                sig_file.seekg(0, std::ios::beg);
+                signature_data.resize(sig_size);
+                if (!sig_file.read((char*)signature_data.data(), sig_size)) {
+                    hpm_fail((int)NULL, "Error reading signature file.\n");
+                    download_and_extract_success = false;
+                    break;
+                }
+            }
+
+            std::string maintainer = config.maintainer.empty() ? "official" : config.maintainer;
+            printf("===> Verifying Ed25519 signature for %s (Key: %s)...\n", named_pkg.name.c_str(), maintainer.c_str());
+            
+            if (!verify_with_maintainer_key(maintainer, file_data, signature_data)) {
+                hpm_fail(1, "CRITICAL SECURITY ERROR: Signature verification failed for package '%s'! Untrusted or corrupted archive.\n", named_pkg.name.c_str());
                 download_and_extract_success = false;
                 break;
             }
@@ -131,7 +180,6 @@ bool hpm_install_packages(const std::vector<std::string>& pkglist) {
         }
 
         if (build_success) {
-            // FIX 2: Check for install_manifest.txt and pass file paths into SQLite
             fs::path manifest_txt = build_dir / "install_manifest.txt";
             std::vector<std::string> installed_files;
 

@@ -4,20 +4,26 @@
 
 #include <iostream>
 #include <string_view>
+#include <filesystem>
 
 int main(int argc, char* argv[])
 {
     std::cout << "hpm: Hypr Package Manager\n";
 
     if (argc < 2) {
-        std::cout << "Usage: hpm [-i|-l|-r|-rf|-sr|-lr|init] [args...]\n";
-        std::cout << "    -i    Install a package\n";
-        std::cout << "    -l    List all installed packages\n";
-        std::cout << "    -r    Remove a package\n";
-        std::cout << "    -rf   Forcibly Remove a package\n";
-        std::cout << "    -sr   Search a package from repositories\n";
-        std::cout << "    -lr   List all repositories\n";
-        std::cout << "    init  Initialize the package home\n";
+        std::cout << "Usage: hpm [-i|--install|-l|--list|-r|--remove|-rf|--force-remove|-sr|--search-repo|-lr|--list-repos|init|key] [args...]\n";
+        std::cout << "    -i, --install           Install a package\n";
+        std::cout << "    -l, --list              List all installed packages\n";
+        std::cout << "    -r, --remove            Remove a package\n";
+        std::cout << "    -rf, --force-remove     Forcibly Remove a package\n";
+        std::cout << "    -sr, --search-repo      Search a package from repositories\n";
+        std::cout << "    -lr, --list-repos       List all repositories\n";
+        std::cout << "    init                    Initialize the package home\n";
+        std::cout << "    key add                 Add a maintainer's public key\n";
+        std::cout << "    key remove              Remove a maintainer's public key\n";
+        std::cout << "    key list                List trusted maintainers\n";
+        std::cout << "    key generate            Generate a new Ed25519 keypair\n";
+        std::cout << "    key extract             Extract the public Ed25519\n";
         return 1;
     }
 
@@ -27,20 +33,20 @@ int main(int argc, char* argv[])
     {
         std::string_view argument = argv[cnt];
 
-        if (argument == "-i") {
+        if (argument == "-i" || argument == "--install") {
             while (cnt + 1 < argc && argv[cnt + 1][0] != '-') {
                 pkglist.push_back(argv[++cnt]);
             }
 
             if (pkglist.empty()) {
-                hpm_fail((int)NULL, "Error: '-i' requires at least one package name.\n");
+                hpm_fail((int)NULL, "Error: '%s' requires at least one package name.\n", std::string(argument).c_str());
                 return 1;
             }
 
             hpm_install_packages(pkglist);
             break;
         }
-        else if (argument == "-l") {
+        else if (argument == "-l" || argument == "--list") {
             std::vector<std::string> packages = db_list_installed_packages();
             
             if (packages.empty()) {
@@ -52,33 +58,33 @@ int main(int argc, char* argv[])
                 printf("Total installed: %zu\n", packages.size());
             }
         } 
-        else if (argument == "-r") {
+        else if (argument == "-r" || argument == "--remove") {
             while (cnt + 1 < argc && argv[cnt + 1][0] != '-') {
                 pkglist.push_back(argv[++cnt]);
             }
 
             if (pkglist.empty()) {
-                hpm_fail((int)NULL, "Error: '-r' requires at least one package name.\n");
+                hpm_fail((int)NULL, "Error: '%s' requires at least one package name.\n", std::string(argument).c_str());
                 return 1;
             }
 
             hpm_uninstall_package(pkglist, false);
             break;
         } 
-        else if (argument == "-rf") {
+        else if (argument == "-rf" || argument == "--force-remove") {
             while (cnt + 1 < argc && argv[cnt + 1][0] != '-') {
                 pkglist.push_back(argv[++cnt]);
             }
 
             if (pkglist.empty()) {
-                hpm_fail((int)NULL, "Error: '-rf' requires at least one package name.\n");
+                hpm_fail((int)NULL, "Error: '%s' requires at least one package name.\n", std::string(argument).c_str());
                 return 1;
             }
 
             hpm_uninstall_package(pkglist, true);
             break;
         } 
-        else if (argument == "-lr") {
+        else if (argument == "-lr" || argument == "--list-repos") {
             hpm_info("Listing configured repositories...\n");
 
             std::vector<std::string> repos = load_repo_urls();
@@ -111,6 +117,57 @@ int main(int argc, char* argv[])
                 }
                 break;
             }
+        }
+        else if (argument == "key") {
+            if (cnt + 1 >= argc) {
+                hpm_fail(1, "Error: 'key' subcommand requires an action (add, remove, list, generate).\n");
+            }
+            std::string subaction = argv[++cnt];
+
+            if (subaction == "add") {
+                if (cnt + 2 >= argc) {
+                    hpm_fail(1, "Usage: hpm key add <maintainer_name> <path_to_pubkey>\n");
+                }
+                std::string name = argv[++cnt];
+                std::filesystem::path keyfile = argv[++cnt];
+                keyring_add_maintainer(name, keyfile);
+            }
+            else if (subaction == "remove") {
+                if (cnt + 1 >= argc) {
+                    hpm_fail(1, "Usage: hpm key remove <maintainer_name>\n");
+                }
+                std::string name = argv[++cnt];
+                keyring_remove_maintainer(name);
+
+            } else if (subaction == "list") {
+                std::vector<std::string> maintainers = keyring_list_maintainers();
+                if (maintainers.empty()) {
+                    printf("No maintainer public keys found in keyring.\n");
+                } else {
+                    printf("Trusted maintainers in keyring (%zu):\n", maintainers.size());
+                    for (const auto& m : maintainers) {
+                        printf("  - %s\n", m.c_str());
+                    }
+                }
+            } else if (subaction == "generate") {
+                if (cnt + 3 >= argc) {
+                    hpm_fail(1, "Usage: hpm key generate <name> <email> <private_key_output_path>\n");
+                }
+                std::string name = argv[++cnt];
+                std::string email = argv[++cnt];
+                std::filesystem::path priv_path = argv[++cnt];
+                keyring_generate_maintainer(name, email, priv_path);
+            } else if (subaction == "extract") {
+                if (cnt + 2 >= argc) {
+                    hpm_fail(1, "Usage: hpm key extract <maintainer_name> <output_path>\n");
+                }
+                std::string name = argv[++cnt];
+                std::filesystem::path out_path = argv[++cnt];
+                keyring_extract_maintainer(name, out_path);
+            } else {
+                hpm_fail(1, "Error: Unknown key subcommand '%s'\n", subaction.c_str());
+            }
+            break;
         }
         else if (argument == "init") {
             return hpm_init();

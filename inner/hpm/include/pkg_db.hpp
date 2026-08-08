@@ -9,3 +9,8 @@ bool db_register_package(const std::string& pkg_name, const std::string& version
 bool db_remove_package(const std::string& pkg_name);
 std::vector<std::string> db_get_dependents(const std::string& pkg_name);
 std::vector<std::string> db_list_installed_packages();
+
+
+bool verify_with_maintainer_key(const std::string& maintainer_name, 
+                                const std::vector<unsigned char>& file_data, 
+                                const std::vector<unsigned char>& signature);

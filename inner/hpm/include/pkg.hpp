@@ -3,6 +3,9 @@
 #include <string>
 #include <vector>
 #include <algorithm>
+#include <filesystem>
+
+namespace fs = std::filesystem;
 
 struct Dependency {
     std::string name;
@@ -17,6 +20,7 @@ struct NamedPackage {
 struct BoxConfig {
     std::string name;
     std::string version;
+    std::string maintainer;
     std::vector<Dependency> dependencies;
     std::vector<NamedPackage> packages;
     std::vector<std::string> commands;
@@ -76,3 +80,9 @@ std::vector<RemotePackageInfo> search_remote_repositories(const std::string& pat
 
 bool parse_box_yaml(const std::string& filepath, BoxConfig& out_config);
 std::vector<std::string> parse_hpm_config_repos(const std::string& filepath);
+
+bool keyring_add_maintainer(std::string name, fs::path keyfile);
+bool keyring_remove_maintainer(std::string name);
+std::vector<std::string> keyring_list_maintainers();
+bool keyring_generate_maintainer(std::string name, std::string email, fs::path private_keyring);
+bool keyring_extract_maintainer(std::string name, fs::path output_path);

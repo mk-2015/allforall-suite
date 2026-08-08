@@ -49,6 +49,9 @@ bool parse_box_yaml(const std::string& filepath, BoxConfig& out_config) {
             } else if (last_key == "version") {
                 out_config.version = value;
                 last_key.clear();
+            } else if (last_key == "maintainer") {
+                out_config.maintainer = value;
+                last_key.clear();
             } else if (last_key == "commands") {
                 out_config.commands.push_back(value);
             } else if (last_key == "dependencies") {

@@ -29,9 +29,11 @@ int hpm_init() {
     fs::path config_file = hpm_dir / ".config.yml";
     fs::path packages_dir = hpm_dir / "packages";
     fs::path db_file = hpm_dir / "db.sqlite";
+    fs::path keyringdir = hpm_dir / "keyring";
 
     try {
         fs::create_directories(packages_dir);
+        fs::create_directories(keyringdir);
 
         if (!fs::exists(config_file)) {
             std::ofstream cfg(config_file);
