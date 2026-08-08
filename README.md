@@ -142,5 +142,5 @@ serve --port 443 --cors --https --folder \"servethething\"
 ## libdot3
 - See '[libdot3 docs](./inner/libdot3/README.md)'
 
-## snipe
-- See '[snipe docs](./inner/snipe/README.md)'
+## hpm
+- See '[hpm docs](./inner/hpm/README.md)'
