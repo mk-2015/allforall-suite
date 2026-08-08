@@ -1,6 +1,0 @@
-  [CXX]  src/install.cpp
-  [CXX]  src/init.cpp
-  [CXX]  src/keyring.cpp
-make: *** [makefile:40: obj/init.o] Interrupt
-make: *** [makefile:40: obj/install.o] Interrupt
-make: *** [makefile:40: obj/keyring.o] Interrupt
