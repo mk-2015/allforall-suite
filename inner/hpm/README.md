@@ -51,3 +51,19 @@ commands:
 
 ## 4. Security & Input Sanitization 
 To prevent path traversal (`../`) and URL/command injection attacks, `hpm` strictly validates all package names and version strings against `[a-zA-Z0-9._+-]`. Invalid or suspicious characters cause execution to instantly abort safely.
+
+## 5. Security & Keyring Management
+`hpm` uses native OpenSSL Ed25519 public-key cryptography to verify package archive signatures (`.sig`) before extraction or execution.
+
+### Keyring CLI Commands
+* `hpm key add <name> <pubkey_path>`: Imports a maintainer's public key into `~/.hpm/keyring/`.
+* `hpm key remove <name>`: Removes a trusted maintainer's key.
+* `hpm key list`: Lists all trusted maintainers in the local keyring.
+* `hpm key generate <name> <email> <path>`: Generates a new Ed25519 keypair.
+* `hpm key extract <name> <path>`: Exports a stored public key.
+* `hpm key sign <privkey> <target_file> <output_sig>`: Generates a signature file for package maintainers.
+
+### Examples
+* `hpm key generate maintainer-joe joe@example.com ./joe.priv`
+* `hpm key sign ./joe.priv ./my-pkg-1.0.0.zip ./my-pkg-1.0.0.zip.sig`
+* `hpm key add official ./official.sig.pub`

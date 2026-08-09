@@ -18,12 +18,14 @@ int main(int argc, char* argv[])
         std::cout << "    -rf, --force-remove     Forcibly Remove a package\n";
         std::cout << "    -sr, --search-repo      Search a package from repositories\n";
         std::cout << "    -lr, --list-repos       List all repositories\n";
+        std::cout << "    -u , --upgrade          Upgrade alll installed packages\n";
         std::cout << "    init                    Initialize the package home\n";
         std::cout << "    key add                 Add a maintainer's public key\n";
         std::cout << "    key remove              Remove a maintainer's public key\n";
         std::cout << "    key list                List trusted maintainers\n";
         std::cout << "    key generate            Generate a new Ed25519 keypair\n";
         std::cout << "    key extract             Extract the public Ed25519\n";
+        std::cout << "    key sign                Sign an archive with the maintainer's private key\n";
         return 1;
     }
 
@@ -117,8 +119,10 @@ int main(int argc, char* argv[])
                 }
                 break;
             }
-        }
-        else if (argument == "key") {
+        } else if (argument == "-u" || argument == "--upgrade") {
+            hpm_upgrade_packages();
+            break;
+        } else if (argument == "key") {
             if (cnt + 1 >= argc) {
                 hpm_fail(1, "Error: 'key' subcommand requires an action (add, remove, list, generate).\n");
             }
@@ -164,14 +168,22 @@ int main(int argc, char* argv[])
                 std::string name = argv[++cnt];
                 std::filesystem::path out_path = argv[++cnt];
                 keyring_extract_maintainer(name, out_path);
+            } else if (subaction == "sign") {
+                if (cnt + 3 >= argc) {
+                    hpm_fail(1, "Usage: hpm key sign <private_key_path> <file_to_sign> <output_sig_path>\n");
+                }
+                std::filesystem::path priv_key = argv[++cnt];
+                std::filesystem::path target_file = argv[++cnt];
+                std::filesystem::path out_sig = argv[++cnt];
+                keyring_sign_archive(priv_key, target_file, out_sig);
             } else {
                 hpm_fail(1, "Error: Unknown key subcommand '%s'\n", subaction.c_str());
             }
             break;
-        }
+        }  
         else if (argument == "init") {
             return hpm_init();
-        } 
+        }
         else {
             hpm_fail((int)NULL, "Error: invalid Argument %s\n", argv[cnt]);
         }

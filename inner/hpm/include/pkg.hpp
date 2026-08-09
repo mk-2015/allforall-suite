@@ -77,6 +77,7 @@ bool hpm_install_packages(const std::vector<std::string>& pkglist);
 int hpm_uninstall_package(const std::vector<std::string>& pkglist, bool force = false);
 std::vector<std::string> load_repo_urls();
 std::vector<RemotePackageInfo> search_remote_repositories(const std::string& pattern_str);
+void hpm_upgrade_packages();
 
 bool parse_box_yaml(const std::string& filepath, BoxConfig& out_config);
 std::vector<std::string> parse_hpm_config_repos(const std::string& filepath);
@@ -86,3 +87,4 @@ bool keyring_remove_maintainer(std::string name);
 std::vector<std::string> keyring_list_maintainers();
 bool keyring_generate_maintainer(std::string name, std::string email, fs::path private_keyring);
 bool keyring_extract_maintainer(std::string name, fs::path output_path);
+bool keyring_sign_archive(fs::path private_key_path, fs::path target_file_path, fs::path output_sig_path);

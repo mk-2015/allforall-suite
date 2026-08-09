@@ -1,11 +1,11 @@
 #include <pkg.hpp>
-#include <deps.hpp>
 #include <pkg_db.hpp>
+#include <deps.hpp>
 #include <iostream>
-#include <fstream>
 #include <vector>
 #include <string>
 #include <filesystem>
+#include <fstream>
 #include <cstdlib>
 #include <cstdio>
 #include <random>
@@ -25,76 +25,96 @@ static fs::path get_temp_directory() {
 #endif
 }
 
-std::vector<std::string> load_repo_urls() {
-    const char* home = std::getenv("HOME");
-    if (!home) home = std::getenv("USERPROFILE");
-    if (!home) return {};
+std::vector<std::string> load_repo_urls(); // Declared elsewhere or in headers
 
-    fs::path config_path = fs::path(home) / ".hpm" / ".config.yml";
-    return parse_hpm_config_repos(config_path.string());
-}
-
-// Structure to hold a potential repo match during install conflict checks
-struct RepoMatch {
+// Helper structure to represent potential upgrade candidates across repositories
+struct RepoUpgradeMatch {
     std::string repo_url;
     std::string manifest_path;
     BoxConfig config;
 };
 
-bool hpm_install_packages(const std::vector<std::string>& pkglist) {
+struct UpgradeCandidate {
+    std::string name;
+    std::string current_version;
+    std::string latest_version;
+    BoxConfig config;
+};
+
+// Simple version comparison helper
+bool is_newer_version(const std::string& current, const std::string& latest) {
+    if (current == latest) return false;
+    return !latest.empty();
+}
+
+void hpm_upgrade_packages() {
+    hpm_info("Checking for package updates across repositories...\n");
+
+    // 1. Get all installed packages from SQLite DB (Expected format: "name:version")
+    std::vector<std::string> installed_pkgs = db_list_installed_packages();
+    if (installed_pkgs.empty()) {
+        std::printf("No packages installed to upgrade.\n");
+        return;
+    }
+
+    // 2. Load repositories
     std::vector<std::string> repos = load_repo_urls();
     if (repos.empty()) {
-        hpm_fail(1, "No repositories configured in ~/.hpm/.config.yml\n");
-        return false;
+        hpm_fail(1, "Error: No repositories configured in ~/.hpm/.config.yml\n");
     }
 
     fs::path tmp_dir = get_temp_directory();
     fs::create_directories(tmp_dir);
 
-    for (const auto& pkg : pkglist) {
-        PackageSpec spec = parse_package_spec(pkg);
-        
-        printf("===> Processing package: %s\n", pkg.c_str());
+    std::vector<UpgradeCandidate> upgrades;
 
-        if (db_is_package_installed(pkg)) {
-            printf("===> Package '%s' is already installed. Skipping.\n", pkg.c_str());
-            continue;
+    // 3. Scan repositories for updates and handle conflicts interactively
+    for (const auto& local_pkg_entry : installed_pkgs) {
+        std::string pkg_name;
+        std::string current_version;
+        size_t delimiter = local_pkg_entry.find(':');
+        
+        if (delimiter != std::string::npos) {
+            pkg_name = local_pkg_entry.substr(0, delimiter);
+            current_version = local_pkg_entry.substr(delimiter + 1);
+        } else {
+            pkg_name = local_pkg_entry;
+            current_version = "unknown";
         }
 
-        // 1. Scan ALL repositories to check for multi-repo conflicts
-        std::vector<RepoMatch> valid_matches;
-        for (const auto& repo : repos) {
-            std::string manifest_url = repo + "/" + spec.name + "/" + spec.version;
-            std::string temp_manifest = (tmp_dir / (spec.name + "-" + std::to_string(rand()) + ".yaml")).string();
+        std::vector<RepoUpgradeMatch> valid_matches;
 
-            printf("===> Checking repository: %s\n", repo.c_str());
-            if (download_file(manifest_url, temp_manifest)) {
+        for (const auto& repo : repos) {
+            std::string manifest_url = repo + "/" + pkg_name + "/latest";
+            std::string fetched_manifest_path = (tmp_dir / (pkg_name + "-latest-" + std::to_string(rand()) + ".yaml")).string();
+
+            if (download_file(manifest_url, fetched_manifest_path)) {
                 BoxConfig temp_config;
-                if (parse_box_yaml(temp_manifest, temp_config)) {
-                    valid_matches.push_back({repo, temp_manifest, temp_config});
+                if (parse_box_yaml(fetched_manifest_path, temp_config)) {
+                    if (is_newer_version(current_version, temp_config.version)) {
+                        valid_matches.push_back({repo, fetched_manifest_path, temp_config});
+                    } else {
+                        fs::remove(fetched_manifest_path);
+                    }
                 } else {
-                    fs::remove(temp_manifest);
+                    fs::remove(fetched_manifest_path);
                 }
             }
         }
 
         if (valid_matches.empty()) {
-            hpm_fail((int)NULL, "Failed to fetch manifest for package '%s' from any repository.\n", pkg.c_str());
-            continue;
+            continue; // No newer versions found for this package
         }
 
-        // 2. Interactive Selection if multiple repositories offer the package
-        BoxConfig config;
+        BoxConfig selected_config;
         std::string chosen_repo;
-        std::string manifest_path;
 
         if (valid_matches.size() == 1) {
             chosen_repo = valid_matches[0].repo_url;
-            config = valid_matches[0].config;
-            manifest_path = valid_matches[0].manifest_path;
-            printf("===> Discovered package in trusted single repo: %s\n", chosen_repo.c_str());
+            selected_config = valid_matches[0].config;
+            fs::remove(valid_matches[0].manifest_path);
         } else {
-            printf("\n[SECURITY WARNING] Multiple repositories provide package '%s':\n", pkg.c_str());
+            printf("\n[SECURITY CONFLICT] Multiple repositories offer a newer version for '%s':\n", pkg_name.c_str());
             for (size_t i = 0; i < valid_matches.size(); ++i) {
                 printf("  [%zu] Repo: %s\n      -> Version: %s (Maintainer: %s)\n", 
                     i + 1, 
@@ -102,18 +122,18 @@ bool hpm_install_packages(const std::vector<std::string>& pkglist) {
                     valid_matches[i].config.version.c_str(),
                     valid_matches[i].config.maintainer.c_str());
             }
-            printf("Select repository number to install from: ");
+            printf("Select repository number to upgrade from: ");
             
             size_t choice = 1;
             if (!(std::cin >> choice) || choice < 1 || choice > valid_matches.size()) {
-                hpm_fail((int)NULL, "Invalid selection. Aborting installation of '%s'.\n", pkg.c_str());
-                for (auto& m : valid_matches) fs::remove(m.manifest_path);
+                printf("Invalid selection. Skipping upgrade for '%s'.\n", pkg_name.c_str());
+                for (const auto& m : valid_matches) fs::remove(m.manifest_path);
                 continue;
             }
             
             chosen_repo = valid_matches[choice - 1].repo_url;
-            config = valid_matches[choice - 1].config;
-            manifest_path = valid_matches[choice - 1].manifest_path;
+            selected_config = valid_matches[choice - 1].config;
+            fs::remove(valid_matches[choice - 1].manifest_path);
 
             // Cleanup unselected manifests
             for (size_t i = 0; i < valid_matches.size(); ++i) {
@@ -123,50 +143,60 @@ bool hpm_install_packages(const std::vector<std::string>& pkglist) {
             }
         }
 
-        // 3. Resolve Dependencies
-        if (!config.dependencies.empty()) {
-            printf("===> Resolving dependencies for %s...\n", pkg.c_str());
-            std::vector<std::string> dep_names;
-            for (const auto& dep : config.dependencies) {
-                dep_names.push_back(dep.name);
-            }
-            hpm_install_packages(dep_names);
-        }
+        upgrades.push_back({
+            pkg_name,
+            current_version,
+            selected_config.version,
+            selected_config
+        });
+    }
 
-        fs::path build_dir = tmp_dir / ("build-" + pkg);
+    if (upgrades.empty()) {
+        std::printf("All packages are already up to date!\n");
+        return;
+    }
+
+    std::printf("Found %zu package(s) to upgrade:\n", upgrades.size());
+    for (const auto& up : upgrades) {
+        std::printf("  - %s: %s -> %s\n", up.name.c_str(), up.current_version.c_str(), up.latest_version.c_str());
+    }
+
+    // 4. Download, Verify, and Build loop for each upgrade candidate
+    for (const auto& up : upgrades) {
+        printf("===> Upgrading package: %s to v%s\n", up.name.c_str(), up.latest_version.c_str());
+
+        fs::path build_dir = tmp_dir / ("build-upgrade-" + up.name);
         fs::create_directories(build_dir);
 
         bool download_and_extract_success = true;
 
-        // 4. Download and Verify Archive Files
-        for (const auto& named_pkg : config.packages) {
+        for (const auto& named_pkg : up.config.packages) {
             std::string archive_path = (build_dir / (named_pkg.name + ".zip")).string();
             std::string sig_path = archive_path + ".sig";
             
             printf("===> Downloading %s from %s...\n", named_pkg.name.c_str(), named_pkg.url.c_str());
 
             if (!download_file(named_pkg.url, archive_path)) {
-                hpm_fail((int)NULL, "Failed to download package archive '%s' from %s\n", named_pkg.name.c_str(), named_pkg.url.c_str());
+                hpm_fail((int)NULL, "Failed to download package archive '%s'\n", named_pkg.name.c_str());
                 download_and_extract_success = false;
                 break;
             }
 
-            // Download signature file
             std::string sig_url = named_pkg.url + ".sig";
             printf("===> Downloading package signature for %s...\n", named_pkg.name.c_str());
             
             if (!download_file(sig_url, sig_path)) {
-                hpm_fail((int)NULL, "Security Error: Failed to download signature file for '%s'. Aborting installation.\n", named_pkg.name.c_str());
+                hpm_fail((int)NULL, "Security Error: Failed to download signature file for '%s'. Aborting upgrade.\n", named_pkg.name.c_str());
                 download_and_extract_success = false;
                 break;
             }
 
-            // Read archive bytes into memory directly via standard streams
+            // Read archive bytes into memory
             std::vector<unsigned char> file_data;
             {
                 std::ifstream file(archive_path, std::ios::binary | std::ios::ate);
                 if (!file.is_open()) {
-                    hpm_fail((int)NULL, "Error opening archive file for reading.\n");
+                    hpm_fail((int)NULL, "Error opening upgrade archive file.\n");
                     download_and_extract_success = false;
                     break;
                 }
@@ -174,18 +204,18 @@ bool hpm_install_packages(const std::vector<std::string>& pkglist) {
                 file.seekg(0, std::ios::beg);
                 file_data.resize(size);
                 if (!file.read((char*)file_data.data(), size)) {
-                    hpm_fail((int)NULL, "Error reading package archive into memory for verification.\n");
+                    hpm_fail((int)NULL, "Error reading upgrade archive into memory.\n");
                     download_and_extract_success = false;
                     break;
                 }
             }
 
-            // Read signature bytes into memory directly via standard streams
+            // Read signature bytes into memory
             std::vector<unsigned char> signature_data;
             {
                 std::ifstream sig_file(sig_path, std::ios::binary | std::ios::ate);
                 if (!sig_file.is_open()) {
-                    hpm_fail((int)NULL, "Error opening signature file for reading.\n");
+                    hpm_fail((int)NULL, "Error opening upgrade signature file.\n");
                     download_and_extract_success = false;
                     break;
                 }
@@ -193,17 +223,17 @@ bool hpm_install_packages(const std::vector<std::string>& pkglist) {
                 sig_file.seekg(0, std::ios::beg);
                 signature_data.resize(sig_size);
                 if (!sig_file.read((char*)signature_data.data(), sig_size)) {
-                    hpm_fail((int)NULL, "Error reading signature file into memory.\n");
+                    hpm_fail((int)NULL, "Error reading upgrade signature file into memory.\n");
                     download_and_extract_success = false;
                     break;
                 }
             }
 
-            std::string maintainer = config.maintainer.empty() ? "official" : config.maintainer;
+            std::string maintainer = up.config.maintainer.empty() ? "official" : up.config.maintainer;
             printf("===> Verifying Ed25519 signature for %s (Key: %s)...\n", named_pkg.name.c_str(), maintainer.c_str());
             
             if (!verify_with_maintainer_key(maintainer, file_data, signature_data)) {
-                hpm_fail(1, "CRITICAL SECURITY ERROR: Signature verification failed for package '%s'! Untrusted or corrupted archive.\n", named_pkg.name.c_str());
+                hpm_fail(1, "CRITICAL SECURITY ERROR: Signature verification failed for package '%s'! Aborting upgrade.\n", named_pkg.name.c_str());
                 download_and_extract_success = false;
                 break;
             }
@@ -218,15 +248,14 @@ bool hpm_install_packages(const std::vector<std::string>& pkglist) {
 
         if (!download_and_extract_success) {
             fs::remove_all(build_dir);
-            fs::remove(manifest_path);
             continue;
         }
 
         // 5. Execute Build Commands
-        printf("===> Running build commands for %s...\n", pkg.c_str());
+        printf("===> Running build commands for %s...\n", up.name.c_str());
         bool build_success = true;
 
-        for (const auto& cmd : config.commands) {
+        for (const auto& cmd : up.config.commands) {
             std::string exec_cmd = "cd " + build_dir.string() + " && " + cmd;
             int res = std::system(exec_cmd.c_str());
             if (res != 0) {
@@ -236,7 +265,7 @@ bool hpm_install_packages(const std::vector<std::string>& pkglist) {
             }
         }
 
-        // 6. Register Package in SQLite Database
+        // 6. Update SQLite Database State
         if (build_success) {
             fs::path manifest_txt = build_dir / "install_manifest.txt";
             std::vector<std::string> installed_files;
@@ -249,18 +278,12 @@ bool hpm_install_packages(const std::vector<std::string>& pkglist) {
                         installed_files.push_back(line);
                     }
                 }
-                printf("===> Tracked %zu installed files from install_manifest.txt\n", installed_files.size());
-            } else {
-                printf("===> Warning: No install_manifest.txt produced during build.\n");
             }
 
-            db_register_package(config.name, config.version, installed_files);
-            printf("===> Successfully installed %s v%s\n", config.name.c_str(), config.version.c_str());
+            db_register_package(up.config.name, up.config.version, installed_files);
+            printf("===> Successfully upgraded %s to v%s\n", up.config.name.c_str(), up.config.version.c_str());
         }
 
         fs::remove_all(build_dir);
-        fs::remove(manifest_path);
     }
-
-    return true;
 }
