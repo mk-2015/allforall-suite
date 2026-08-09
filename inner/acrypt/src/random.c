@@ -125,7 +125,7 @@ void* RANDOM_GET_bytes_NO_HANDLE(size_t size) {
     }
 
     RANDOM_LOAD_bytes(size, &r);
-    void* data = RANDOM_GET_BYTES(r);
+    void* data = RANDOM_GET_bytes(r);
 
     r.bytes = NULL; 
 

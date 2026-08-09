@@ -1,5 +1,5 @@
 CC       = gcc
-CFLAGS   = -Wall -Wextra -I -O3 -fPIC
+CFLAGS   = -Wall -Wextra -Iinclude -O3 -fPIC
 
 SRC      = src
 OBJ      = obj
@@ -8,7 +8,7 @@ LIBDIR   = lib
 SOURCES  := $(shell find $(SRC) -name '*.c')
 OBJECTS  := $(patsubst $(SRC)/%.c, $(OBJ)/%.o, $(SOURCES))
 
-LIB_STATIC = $(LIBDIR)/alibc.a
+LIB_STATIC = $(LIBDIR)/libacrypt.a
 
 ifeq ($(OS),Windows_NT)
     LIB_SHARED   = $(LIBDIR)/libacrypt.dll
