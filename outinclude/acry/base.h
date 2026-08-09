@@ -56,8 +56,6 @@ typedef int* HANDLE_t;
 #define ACRY_SHA224_BLOCK_SIZE 64
 #define ACRY_SHA224_DIGEST_SIZE 28
 
-#define AES_BLOCK_SIZE 16
-
 typedef uint8_t  acry_u8;
 typedef uint16_t acry_u16;
 typedef uint32_t acry_u32;
@@ -114,8 +112,3 @@ typedef struct {
     PEM_BLOCK *blocks;
     size_t count;
 } PEM_DOCUMENT;
-
-typedef struct {
-    acry_u32 round_keys[60]; /* enough words for AES-256: (14+1) round keys * 4 words */
-    int num_rounds;          /* 10 (AES-128), 12 (AES-192), 14 (AES-256); 0 if key_len was invalid */
-} AES_HANDLE;
