@@ -41,8 +41,6 @@ deps:
 		fi; \
 	done
 
-all: setup build_subprojects deploy
-
 install: all
 ifeq ($(OS_TYPE),MSYS)
 	cp -r $(OUT)/bin/* /usr/bin/ 2>/dev/null || true
@@ -98,6 +96,8 @@ deploy:
 	@-[ -d $(BIN) ] && cp -r $(BIN)/* $(OUT)/bin/ 2>/dev/null || true
 	@-[ -d $(LIB) ] && cp -r $(LIB)/* $(OUT)/lib/ 2>/dev/null || true
 	@-[ -d $(INC) ] && cp -r $(INC)/* $(OUT)/include/ 2>/dev/null || true
+
+all: setup build_subprojects deploy
 
 clean:
 	rm -rf $(BIN) $(LIB) $(INC) $(OUT)

@@ -48,11 +48,12 @@ clean:
 	@$(call RMDIR, $(OBJ_DIR))
 	@$(call RMDIR, $(BIN_DIR))
 	@echo "  [CLEAN] Cleaned"
+	mkdir -p $(OBJ_DIR)/utils || true
 
 deps:
 	@$(call MKDIR, $(OBJ_DIR))
 	@$(call MKDIR, $(BIN_DIR))
-	mkdir $(OBJ_DIR)/utils
+	mkdir -p $(OBJ_DIR)/utils || true
 	@$(call MKDIR, $(INCLUDE))
 	@$(call MKDIR, $(SRC_DIR))
 	# Download headers

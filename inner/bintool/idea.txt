@@ -1,0 +1,35 @@
+1. File Inspection & Analysis
+
+    Hex Viewer/Editor (binview / binhex): Color-coded hexadecimal and ASCII dump, offset navigation, and search for byte patterns/magic numbers.
+
+    String Extractor (binstrings): Scans binaries for printable strings (ASCII, UTF-8, UTF-16) with configurable minimum length and offsets.
+
+    Entropy Calculator (binentropy): Calculates Shannon entropy across byte blocks to detect compressed or encrypted regions (useful for reverse engineering and malware analysis).
+
+    File Format Identifier (binid): Parses file signatures (magic bytes) to identify file types independently of extensions.
+
+2. Executable & Object File Parsers
+
+    Header Inspector (binheader): Parses headers for platform binaries (ELF on Linux, PE on Windows, Mach-O on macOS). Displays entry points, architectures, sections, and flags.
+
+    Symbol & Export Reader (binsym): Displays exported functions, imported dynamic libraries, and symbol tables (similar to nm or objdump -t).
+
+    Disassembler Wrapper (bindisassemble): Disassembles binary sections into assembly instructions (integrating libraries like Capstone or Zydis).
+
+3. Binary Data Manipulation
+
+    Byte Patch Tool (binpatch): Overwrites specific offsets with raw hex, strings, or pattern matches without re-encoding the whole file.
+
+    [-] Binary Diff (bindiff): Visualizes structural or byte-level differences between two binary files side-by-side.
+
+    Bitwise Transformer (bintransform): Applies byte-level operations (XOR, OR, AND, bit-shifts, byte-swapping/endianness conversion) across files.
+
+4. Packing & Unpacking Utilities
+
+    Archive/Section Extractor (binextract): Carves embedded files, payload sections, or resources out of executable files.
+
+    [V] Checksum & Hash Generator (binhash): Calculates CRC32, MD5, SHA-256, and fuzzy hashes (like SSDEEP) for binary comparison.
+
+5. Other
+    [V] File comparison utility
+    [V] File to C/C++ header for easy embedding
