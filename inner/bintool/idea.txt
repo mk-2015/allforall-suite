@@ -20,7 +20,7 @@
 
     Byte Patch Tool (binpatch): Overwrites specific offsets with raw hex, strings, or pattern matches without re-encoding the whole file.
 
-    [-] Binary Diff (bindiff): Visualizes structural or byte-level differences between two binary files side-by-side.
+    Binary Diff (bindiff): Visualizes structural or byte-level differences between two binary files side-by-side.
 
     Bitwise Transformer (bintransform): Applies byte-level operations (XOR, OR, AND, bit-shifts, byte-swapping/endianness conversion) across files.
 
