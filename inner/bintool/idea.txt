@@ -4,7 +4,7 @@
 
     String Extractor (binstrings): Scans binaries for printable strings (ASCII, UTF-8, UTF-16) with configurable minimum length and offsets.
 
-    Entropy Calculator (binentropy): Calculates Shannon entropy across byte blocks to detect compressed or encrypted regions (useful for reverse engineering and malware analysis).
+    [V] Entropy Calculator (binentropy): Calculates Shannon entropy across byte blocks to detect compressed or encrypted regions (useful for reverse engineering and malware analysis).
 
     File Format Identifier (binid): Parses file signatures (magic bytes) to identify file types independently of extensions.
 
@@ -18,7 +18,7 @@
 
 3. Binary Data Manipulation
 
-    Byte Patch Tool (binpatch): Overwrites specific offsets with raw hex, strings, or pattern matches without re-encoding the whole file.
+    [V] Byte Patch Tool (binpatch): Overwrites specific offsets with raw hex, strings, or pattern matches without re-encoding the whole file.
 
     Binary Diff (bindiff): Visualizes structural or byte-level differences between two binary files side-by-side.
 
