@@ -6,3 +6,4 @@
 - [bpatch](./bpatch.md)
 - [be](./be%20and%20bce.md)
 - [bce](./be%20and%20bce.md)
+- [bincat](./bincat.md)
