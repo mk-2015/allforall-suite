@@ -44,8 +44,8 @@ void csprng(randalg_t* randalg) {
         }
     }
 #endif
+
     if (success) {
-        randalg->random_out = (RANDOM_OUT)crypto_val;
         randalg->random_seed = (RANDOM_SEED)crypto_val;
     } else {
         uint64_t hash = (uint64_t)randalg->random_seed ^ 0x9E3779B97F4A7C15ULL;

@@ -7,7 +7,7 @@ typedef long long RANDOM_SEED;
 typedef unsigned long long RANDOM_OUT;
 typedef int MIX;
 typedef int MIX_SEED;
-typedef unsigned long long RANDOM_STATE[STATE_SIZE];
+typedef unsigned long long *RANDOM_STATE;
 
 extern int pthread_en;
 

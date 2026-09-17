@@ -23,6 +23,10 @@ void pcg64(randalg_t* randalg);
 void pcg_rxs_m_xs(randalg_t* randalg);
 void csprng(randalg_t* randalg);
 void trng(randalg_t* randalg);
+void logistic_map(randalg_t* randalg);
+void philox_4x32(randalg_t* randalg);
+void kiss(randalg_t* randalg);
+void xoshiro256pp(randalg_t* randalg);
 
 static inline void resetstate(randalg_t *rhandle) {
     uint64_t current = (uint64_t)rhandle->random_seed;

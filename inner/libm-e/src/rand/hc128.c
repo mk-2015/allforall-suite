@@ -3,33 +3,51 @@
 #include <stdint.h>
 #include "in.h"
 
-// Basic HC-128 implementation (Simplified state handling)
 void hc128(randalg_t *randalg) {
     uint32_t *state = (uint32_t *)randalg->random_state;
-    // P and Q are each 512 words (2048 bytes)
     uint32_t *P = state;
     uint32_t *Q = state + 512;
-    uint32_t *counter = state + 1024; // Use remaining space for counter
+    uint32_t *counter = state + 1024;
 
-    // Initialization (simplified)
     if (*counter == 0) {
-        for (int i = 0; i < 512; i++) P[i] = i ^ 0xDEADBEEF;
-        for (int i = 0; i < 512; i++) Q[i] = i ^ 0xCAFEBABE;
+        uint32_t key_low = (uint32_t)(randalg->random_seed & 0xFFFFFFFF);
+        uint32_t key_high = (uint32_t)((randalg->random_seed >> 32) & 0xFFFFFFFF);
+        uint32_t mix_low = (uint32_t)(randalg->mix_seed & 0xFFFFFFFF);
+        uint32_t mix_high = (uint32_t)(((uint64_t)randalg->mix_seed >> 32) & 0xFFFFFFFF);
+
+        for (int i = 0; i < 512; i++) {
+            P[i] = key_low ^ (i * 0x9E3779B9U) ^ mix_high;
+            Q[i] = key_high ^ (i * 0x85EBCA6BU) ^ mix_low;
+        }
         *counter = 1;
     }
 
-    uint32_t i = (*counter) & 511;
+    uint32_t i = (*counter - 1) & 511;
+    uint32_t step = (*counter - 1) & 1023;
     uint32_t output;
-    
-    // Core HC-128 step
-    if ((*counter & 512) == 0) {
-        P[i] = P[i] + (P[(i - 3) & 511] ^ P[(i - 10) & 511]) + (P[(i - 511) & 511] ^ P[(i - 1) & 511]);
-        output = Q[(P[(i - 12) & 511] >> 24) + (P[(i - 12) & 511] & 255)] ^ P[i];
+
+    if (step < 512) {
+        uint32_t i3 = (i - 3) & 511;
+        uint32_t i10 = (i - 10) & 511;
+        uint32_t i511 = (i - 511) & 511;
+        uint32_t i12 = (i - 12) & 511;
+
+        P[i] += (P[i3] ^ P[i10]) + (P[i511] ^ P[(i - 1) & 511]);
+        uint32_t index = (P[i12] & 0xFF) + ((P[i12] >> 24) & 0xFF);
+        output = Q[index & 511] ^ P[i];
     } else {
-        Q[i] = Q[i] + (Q[(i - 3) & 511] ^ Q[(i - 10) & 511]) + (Q[(i - 511) & 511] ^ Q[(i - 1) & 511]);
-        output = P[(Q[(i - 12) & 511] >> 24) + (Q[(i - 12) & 511] & 255)] ^ Q[i];
+        uint32_t i3 = (i - 3) & 511;
+        uint32_t i10 = (i - 10) & 511;
+        uint32_t i511 = (i - 511) & 511;
+        uint32_t i12 = (i - 12) & 511;
+
+        Q[i] += (Q[i3] ^ Q[i10]) + (Q[i511] ^ Q[(i - 1) & 511]);
+        uint32_t index = (Q[i12] & 0xFF) + ((Q[i12] >> 24) & 0xFF);
+        output = P[index & 511] ^ Q[i];
     }
-    
+
     (*counter)++;
-    randalg->random_out = (RANDOM_OUT)output;
+    if (*counter == 0) *counter = 1;
+
+    randalg->random_seed = (RANDOM_SEED)output | ((RANDOM_SEED)P[i] << 32);
 }

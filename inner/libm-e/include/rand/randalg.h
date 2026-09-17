@@ -22,6 +22,10 @@
 #define RANDALG_PCG64                14
 #define RANDALG_CSPRNG               5
 #define RANDALG_TRNG                 6
+#define RANDALG_LOGISTIC_MAP         21
+#define RANDALG_PHILOX_4X32          22
+#define RANDALG_KISS                 23
+#define RANDALG_XOSHIRO256PP         24
 #define RANDALG_DEFAULT              RANDALG_PCGR
 
 #define OPEN_RAND_FAILMALLOC         -1
@@ -36,6 +40,6 @@
 #define MIX_ON                       1
 #define MIX_NO                       0
 
-static inline uint64_t rotl(const uint64_t x, int k) {
+static inline uint64_t rotatel(const uint64_t x, int k) {
     return (x << k) | (x >> (64 - k));
 }
