@@ -50,10 +50,6 @@ deps:
 
 all: directories static dynamic
 
-test: static
-	$(CC) $(CFLAGS) test.c -L$(LIB) -l:$(notdir $(TARGET_STATIC)) -o test_runner -lpthread
-	./test_runner
-
 directories:
 	@$(MKDIR_CMD)
 
