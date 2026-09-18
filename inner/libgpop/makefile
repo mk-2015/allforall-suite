@@ -3,7 +3,7 @@ SRC     := src
 LIB     := lib
 OBJ     := obj
 
-LIBNAME := libm-e
+LIBNAME := libgpop
 TARGET  := $(LIB)/$(LIBNAME)
 
 STATIC_WINDOWS_LIB := $(TARGET).a
@@ -17,6 +17,12 @@ CFLAGS  := -I$(INCLUDE) -fPIC -Wall -Wextra -O3 -std=c11
 
 OBJ_STATIC  := $(OBJ)/static
 OBJ_DYNAMIC := $(OBJ)/dynamic
+
+ENABLE_ARCHNATIV ?= 0
+
+ifeq ($(ENABLE_ARCHNATIV), 1)
+    CFLAGS += -march=native -flto
+endif
 
 ifeq ($(OS),Windows_NT)
 	TARGET_DYLIB  := $(DYNAMIC_WINDOWS_LIB)
@@ -37,12 +43,12 @@ SRCS := $(shell find $(SRC) -name "*.c")
 OBJS_STATIC  := $(patsubst $(SRC)/%,$(OBJ_STATIC)/%,$(SRCS:.c=.o))
 OBJS_DYNAMIC := $(patsubst $(SRC)/%,$(OBJ_DYNAMIC)/%,$(SRCS:.c=.o))
 
-.PHONY: all clean directories static dynamic deps test
+.PHONY: all clean directories static dynamic deps
 
 deps:
 	# None
 
-all: directories static dynamic deps
+all: directories static dynamic
 
 test: static
 	$(CC) $(CFLAGS) test.c -L$(LIB) -l:$(notdir $(TARGET_STATIC)) -o test_runner -lpthread

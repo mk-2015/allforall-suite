@@ -148,5 +148,5 @@ serve --port 443 --cors --https --folder \"servethething\"
 ## bintool
 - See '[bintool docs](./inner/bintool/docs/index.md)'
 
-## libm-e
-- See '[libm-e docs](./inner/libm-e/README.md)'
+## libgpop
+- See '[libgpop docs](./inner/libgpop/README.md)'
