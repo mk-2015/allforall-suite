@@ -438,6 +438,111 @@ double Vector2_Dot(Vector2* a, Vector2* b, err* Err)
     return (double)(prod_x + prod_y);
 }
 
+double Vector2_Cross(Vector2* a, Vector2* b, err* Err)
+{
+    if (Err == NULL) return -1;
+    if (a == NULL || b == NULL) { *Err = EV2_NULLVEC; return -2; }
+
+    if (a->x != 0 && b->y != 0) {
+        if (a->x > 0) {
+            if (b->y > 0 && a->x > INT64_MAX / b->y) { *Err = EV2_UB; return -3; }
+            if (b->y < 0 && b->y < INT64_MIN / a->x) { *Err = EV2_UB; return -3; }
+        } else {
+            if (b->y > 0 && a->x < INT64_MIN / b->y) { *Err = EV2_UB; return -3; }
+            if (b->y < 0 && (a->x == INT64_MIN || b->y == INT64_MIN || (-a->x) > INT64_MAX / (-b->y))) { *Err = EV2_UB; return -3; }
+        }
+    }
+
+    if (a->y != 0 && b->x != 0) {
+        if (a->y > 0) {
+            if (b->x > 0 && a->y > INT64_MAX / b->x) { *Err = EV2_UB; return -3; }
+            if (b->x < 0 && b->x < INT64_MIN / a->y) { *Err = EV2_UB; return -3; }
+        } else {
+            if (b->x > 0 && a->y < INT64_MIN / b->x) { *Err = EV2_UB; return -3; }
+            if (b->x < 0 && (a->y == INT64_MIN || b->x == INT64_MIN || (-a->y) > INT64_MAX / (-b->x))) { *Err = EV2_UB; return -3; }
+        }
+    }
+
+    int64_t term1 = a->x * b->y;
+    int64_t term2 = a->y * b->x;
+
+    if ((term2 < 0 && term1 > INT64_MAX + term2) || (term2 > 0 && term1 < INT64_MIN + term2)) {
+        *Err = EV2_UB; return -3;
+    }
+
+    *Err = EV2_SUCCESS;
+    return (double)(term1 - term2);
+}
+
+double Vector2_AngleBetween(Vector2* a, Vector2* b, err* Err)
+{
+    if (Err == NULL) return -1;
+    if (a == NULL || b == NULL) { *Err = EV2_NULLVEC; return -2; }
+
+    double dot = Vector2_Dot(a, b, Err);
+    if (*Err != EV2_SUCCESS) return -3;
+
+    double len_a = hypot((double)a->x, (double)a->y);
+    double len_b = hypot((double)b->x, (double)b->y);
+
+    if (len_a == 0.0 || len_b == 0.0) { *Err = EV2_UB; return -4; }
+
+    double cos_theta = dot / (len_a * len_b);
+
+    if (cos_theta > 1.0) cos_theta = 1.0;
+    if (cos_theta < -1.0) cos_theta = -1.0;
+
+    *Err = EV2_SUCCESS;
+    return acos(cos_theta);
+}
+
+err Vector2_Rotate(Vector2* a, double radians, int64_t* out_x, int64_t* out_y, err* Err)
+{
+    if (a == NULL || out_x == NULL || out_y == NULL) { if (Err != NULL) *Err = EV2_NULLVEC; return -2; }
+    if (isnan(radians) || isinf(radians)) { if (Err != NULL) *Err = EV2_UB; return -3; }
+
+    double cos_r = cos(radians);
+    double sin_r = sin(radians);
+
+    double rx = ((double)a->x * cos_r) - ((double)a->y * sin_r);
+    double ry = ((double)a->x * sin_r) + ((double)a->y * cos_r);
+
+    if (rx < (double)INT64_MIN || rx > (double)INT64_MAX ||
+        ry < (double)INT64_MIN || ry > (double)INT64_MAX) {
+        if (Err != NULL) { *Err = EV2_UB; return -4; }
+    }
+
+    *out_x = (int64_t)rx;
+    *out_y = (int64_t)ry;
+
+    if (Err != NULL) *Err = EV2_SUCCESS;
+    return EV2_SUCCESS;
+}
+
+err Vector2_Lerp(Vector2* a, Vector2* b, double t, int64_t* out_x, int64_t* out_y, err* Err)
+{
+    if (a == NULL || b == NULL || out_x == NULL || out_y == NULL) { if (Err != NULL) *Err = EV2_NULLVEC; return -2; }
+    if (isnan(t) || isinf(t)) { if (Err != NULL) *Err = EV2_UB; return -3; }
+
+    if (t < 0.0) t = 0.0;
+    if (t > 1.0) t = 1.0;
+
+    double lx = (double)a->x + t * ((double)b->x - (double)a->x);
+    double ly = (double)a->y + t * ((double)b->y - (double)a->y);
+
+    if (lx < (double)INT64_MIN || lx > (double)INT64_MAX ||
+        ly < (double)INT64_MIN || ly > (double)INT64_MAX) {
+        if (Err != NULL) { *Err = EV2_UB; return -4; }
+    }
+
+    *out_x = (int64_t)lx;
+    *out_y = (int64_t)ly;
+
+    if (Err != NULL) *Err = EV2_SUCCESS;
+    return EV2_SUCCESS;
+}
+
+
 
 err Vector2_Destroy(Vector2** Vector)
 {

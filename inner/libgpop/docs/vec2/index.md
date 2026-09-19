@@ -24,3 +24,7 @@ This section provides functionality for 2D vectors utilizing 64-bit integer valu
 - [Vector2_DistanceSquared](Vector2_DistanceSquared.md)
 - [Vector2_Normalize](Vector2_Normalize.md)
 - [Vector2_Dot](Vector2_Dot.md)
+- [Vector2_Cross](Vector2_Cross.md)
+- [Vector2_AngleBetween](Vector2_AngleBetween.md)
+- [Vector2_Rotate](Vector2_Rotate.md)
+- [Vector2_Lerp](Vector2_Lerp.md)

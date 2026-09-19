@@ -38,4 +38,8 @@ double Vector2_Distance(Vector2* a, Vector2* b, err* Err);
 double Vector2_DistanceSquared(Vector2* a, Vector2* b, err* Err);
 err Vector2_Normalize(Vector2* a, int64_t* out_x, int64_t* out_y);
 double Vector2_Dot(Vector2* a, Vector2* b, err* Err);
+double Vector2_Cross(Vector2* a, Vector2* b, err* Err);
+double Vector2_AngleBetween(Vector2* a, Vector2* b, err* Err);
+err Vector2_Rotate(Vector2* a, double radians, int64_t* out_x, int64_t* out_y, err* Err);
+err Vector2_Lerp(Vector2* a, Vector2* b, double t, int64_t* out_x, int64_t* out_y, err* Err);
 err Vector2_Destroy(Vector2** Vector);
