@@ -41,6 +41,8 @@ typedef struct Map3D_s
 
 Map3D* Map3D_Init(pos x, pos y, pos z);
 void Map3D_Resize(Map3D* Map, pos x, pos y, pos z);
+int Map3D_Save(const char* filename, Map3D* map);
+Map3D* Map3D_Load(const char* filename);
 void Map3D_Zero(Map3D* Map);
 err Map3D_GetLastError(Map3D* Map);
 

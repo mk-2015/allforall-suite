@@ -367,3 +367,132 @@ bool Map3D_BitGet(Map3D* Map, int8_t n)
 
     return (*p & (uint8_t)(1u << n)) != 0;
 }
+
+int Map3D_Save(const char* filename, Map3D* map)
+{
+    FILE* fp = NULL;
+    uint64_t header[3];
+    pos z_idx, y_idx;
+
+    if (!filename || !map || !map->Map)
+        return -1;
+
+    if (map->x > UINT64_MAX || map->y > UINT64_MAX || map->z > UINT64_MAX)
+    {
+        map->Error = MAP3D_OVERFLOW;
+        return -1;
+    }
+
+    fp = fopen(filename, "wb");
+    if (!fp)
+    {
+        map->Error = MAP3D_FILEERROR;
+        return -1;
+    }
+
+    header[0] = (uint64_t)map->x;
+    header[1] = (uint64_t)map->y;
+    header[2] = (uint64_t)map->z;
+
+    if (fwrite(header, sizeof(uint64_t), 3, fp) != 3)
+    {
+        map->Error = MAP3D_FILEERROR;
+        fclose(fp);
+        return -1;
+    }
+
+    for (z_idx = 0; z_idx < map->z; z_idx++)
+    {
+        if (!map->Map[z_idx])
+        {
+            map->Error = MAP3D_PARSEERROR;
+            fclose(fp);
+            return -1;
+        }
+
+        for (y_idx = 0; y_idx < map->y; y_idx++)
+        {
+            uint8_t* row = map->Map[z_idx][y_idx];
+            if (!row)
+            {
+                map->Error = MAP3D_PARSEERROR;
+                fclose(fp);
+                return -1;
+            }
+
+            if (fwrite(row, sizeof(uint8_t), (size_t)map->x, fp) != (size_t)map->x)
+            {
+                map->Error = MAP3D_FILEERROR;
+                fclose(fp);
+                return -1;
+            }
+        }
+    }
+
+    fclose(fp);
+    map->Error = MAP3D_SUCCESS;
+    return 0;
+}
+
+Map3D* Map3D_Load(const char* filename)
+{
+    FILE* fp = NULL;
+    uint64_t header[3];
+    pos x, y, z;
+    pos z_idx, y_idx;
+    Map3D* map = NULL;
+    int ch;
+
+    if (!filename)
+        return NULL;
+
+    fp = fopen(filename, "rb");
+    if (!fp)
+        return NULL;
+
+    if (fread(header, sizeof(uint64_t), 3, fp) != 3)
+    {
+        fclose(fp);
+        return NULL;
+    }
+
+    x = (pos)header[0];
+    y = (pos)header[1];
+    z = (pos)header[2];
+
+    map = Map3D_Init(x, y, z);
+    if (!map)
+    {
+        fclose(fp);
+        return NULL;
+    }
+
+    for (z_idx = 0; z_idx < z; z_idx++)
+    {
+        for (y_idx = 0; y_idx < y; y_idx++)
+        {
+            uint8_t* row = map->Map[z_idx][y_idx];
+
+            if (fread(row, sizeof(uint8_t), (size_t)x, fp) != (size_t)x)
+            {
+                map->Error = MAP3D_PARSEERROR;
+                Map3D_Deinit(map);
+                fclose(fp);
+                return NULL;
+            }
+        }
+    }
+
+    ch = fgetc(fp);
+    if (ch != EOF)
+    {
+        map->Error = MAP3D_PARSEERROR;
+        Map3D_Deinit(map);
+        fclose(fp);
+        return NULL;
+    }
+
+    fclose(fp);
+    map->Error = MAP3D_SUCCESS;
+    return map;
+}
