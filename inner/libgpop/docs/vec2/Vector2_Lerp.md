@@ -1,18 +1,15 @@
-# Vector2_Lerp
+# Vector2::Lerp
 
-```c
-err Vector2_Lerp(Vector2* a, Vector2* b, double t, int64_t* out_x, int64_t* out_y, err* Err);
+```cpp
+Vector2 Lerp(const Vector2& b, double t, err* Err) const;
 ```
 
-Performs linear interpolation between vector `a` and vector `b` by factor `t`.
+Linearly interpolates between the current vector and vector `b` by factor `t` (0.0 to 1.0).
 
 ### Parameters
-- `a`: Pointer to the starting `Vector2`.
-- `b`: Pointer to the ending `Vector2`.
-- `t`: Interpolation factor, typically between 0.0 and 1.0.
-- `out_x`: Pointer to the integer where the interpolated X component will be stored.
-- `out_y`: Pointer to the integer where the interpolated Y component will be stored.
-- `Err`: Pointer to an error code (`err`) destination.
+- `b`: Const reference to the target `Vector2`.
+- `t`: Interpolation factor (0.0 returns this, 1.0 returns `b`).
+- `Err`: Pointer to an error code (`err`) destination. It will be set to `EV2_SUCCESS` on success or an error code on failure.
 
 ### Returns
-`EV2_SUCCESS` on success, or an error code if calculation fails.
+The interpolated `Vector2`.

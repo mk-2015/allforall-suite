@@ -1,15 +1,14 @@
-# Vector3_FromVector2
+# Vector3::FromVector2
 
-```c
-Vector3* Vector3_FromVector2(Vector2* v2, int64_t z, err* Err);
+```cpp
+static Vector3* FromVector2(const Vector2& v2, int64_t z);
 ```
 
-Creates a 3D vector from a 2D vector and a specified Z-component.
+Creates a `Vector3` from a `Vector2` and a Z component.
 
 ### Parameters
-- `v2`: Pointer to the source `Vector2`.
-- `z`: Z-component for the new vector.
-- `Err`: Pointer to an error code (`err`) destination.
+- `v2`: Source `Vector2`.
+- `z`: Initial Z component.
 
 ### Returns
-Pointer to a newly allocated `Vector3`, or `NULL` on failure.
+Pointer to new `Vector3`.

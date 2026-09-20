@@ -1,15 +1,14 @@
-# Vector3_DistanceSquared
+# Vector3::DistanceSquared
 
-```c
-double Vector3_DistanceSquared(Vector3* a, Vector3* b, err* Err);
+```cpp
+double DistanceSquared(const Vector3& b, err* Err) const;
 ```
 
-Calculates the squared Euclidean distance between vector `a` and vector `b` in 3D space. This is more performant than `Vector3_Distance` as it avoids a square root calculation.
+Calculates squared Euclidean distance between this vector and `b`.
 
 ### Parameters
-- `a`: Pointer to the first `Vector3`.
-- `b`: Pointer to the second `Vector3`.
-- `Err`: Pointer to an error code (`err`) destination. It will be set to `EV3_SUCCESS` on success, `EV3_NULLVEC` if either vector is `NULL`, or `EV3_UB` if calculation steps overflow or hit undefined boundaries.
+- `b`: Const reference to second `Vector3`.
+- `Err`: Pointer to error code.
 
 ### Returns
-The squared distance between the two vectors as a `double`, or a negative value on error.
+Squared distance as `double`.

@@ -1,14 +1,13 @@
-# Vector3_Length
+# Vector3::Length
 
-```c
-double Vector3_Length(Vector3* a, err* Err);
+```cpp
+double Length(err* Err) const;
 ```
 
-Calculates the geometric length (magnitude) of the vector `a`.
+Calculates the geometric length (magnitude) of the current vector.
 
 ### Parameters
-- `a`: Pointer to the `Vector3`.
-- `Err`: Pointer to an error code (`err`) destination. It will be set to `EV3_SUCCESS` on success, `EV3_NULLVEC` if `a` is `NULL`, or `EV3_UNDERFLOW` if any coordinate contains `INT64_MIN`.
+- `Err`: Pointer to error code.
 
 ### Returns
-The length of the vector as a `double`, or a negative value on error.
+Length as `double`.

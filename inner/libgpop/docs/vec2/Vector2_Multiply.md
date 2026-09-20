@@ -1,16 +1,14 @@
-# Vector2_Multiply
+# Vector2::Multiply
 
-```c
-err Vector2_Multiply(Vector2* a, Vector2* b);
+```cpp
+err Multiply(const Vector2& b);
 ```
 
-Multiplies vector `a` components by vector `b` components (`a.x = a.x * b.x`, `a.y = a.y * b.y`), with integer overflow safety.
+Multiplies current vector components by vector `b` components (`this.x = this.x * b.x`, `this.y = this.y * b.y`), with integer overflow safety.
 
 ### Parameters
-- `a`: Pointer to the destination/first operand `Vector2`.
-- `b`: Pointer to the source/second operand `Vector2`.
+- `b`: Const reference to the source `Vector2`.
 
 ### Returns
 - `EV2_SUCCESS` on success.
-- `EV2_NULLVEC` if either vector is `NULL`.
 - `EV2_OVERFLOW` if the multiplication causes an overflow or underflow.

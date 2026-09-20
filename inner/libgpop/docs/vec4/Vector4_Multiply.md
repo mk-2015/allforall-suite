@@ -1,16 +1,14 @@
-# Vector4_Multiply
+# Vector4::Multiply
 
-```c
-err Vector4_Multiply(Vector4* a, Vector4* b);
+```cpp
+err Multiply(const Vector4& b);
 ```
 
-Multiplies vector `a` components by vector `b` components (`a = a * b`), with overflow protection.
+Multiplies current vector components by vector `b` components (`this.x *= b.x`, `this.y *= b.y`, `this.z *= b.z`, `this.w *= b.w`), with integer overflow safety.
 
 ### Parameters
-- `a`: Pointer to the destination/first operand `Vector4`.
-- `b`: Pointer to the source/second operand `Vector4`.
+- `b`: Const reference to the source `Vector4`.
 
 ### Returns
 - `EV4_SUCCESS` on success.
-- `EV4_NULLVEC` if either vector is `NULL`.
 - `EV4_OVERFLOW` if multiplication causes an overflow or underflow.

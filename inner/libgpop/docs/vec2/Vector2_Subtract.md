@@ -1,16 +1,14 @@
-# Vector2_Subtract
+# Vector2::Subtract
 
-```c
-err Vector2_Subtract(Vector2* a, Vector2* b);
+```cpp
+err Subtract(const Vector2& b);
 ```
 
-Subtracts vector `b` from vector `a` (`a = a - b`), with full overflow and underflow protection.
+Subtracts vector `b` from the current vector instance (`this = this - b`), with full overflow and underflow protection.
 
 ### Parameters
-- `a`: Pointer to the destination/first operand `Vector2`.
-- `b`: Pointer to the source/second operand `Vector2`.
+- `b`: Const reference to the source `Vector2`.
 
 ### Returns
 - `EV2_SUCCESS` on success.
-- `EV2_NULLVEC` if either vector is `NULL`.
 - `EV2_UNDERFLOW` if subtraction would cause an integer overflow/underflow.

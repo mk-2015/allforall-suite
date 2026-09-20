@@ -11,9 +11,9 @@ STATIC_LINUX_LIB := $(TARGET)-linux.a
 DYNAMIC_WINDOWS_LIB := $(TARGET).dll
 DYNAMIC_LINUX_LIB := $(TARGET)-linux.so
 
-CC      := gcc
+CC      := g++
 AR	    := ar
-CFLAGS  := -I$(INCLUDE) -fPIC -Wall -Wextra -O3 -std=c11
+CFLAGS  := -I$(INCLUDE) -fPIC -Wall -Wextra -O3 -std=c++17
 
 OBJ_STATIC  := $(OBJ)/static
 OBJ_DYNAMIC := $(OBJ)/dynamic
@@ -38,10 +38,10 @@ else
 	MKDIR_CMD     := mkdir -p $(INCLUDE) $(SRC) $(LIB) $(OBJ) $(OBJ_STATIC) $(OBJ_DYNAMIC)
 endif
 
-SRCS := $(shell find $(SRC) -name "*.c")
+SRCS := $(shell find $(SRC) -name "*.cpp")
 
-OBJS_STATIC  := $(patsubst $(SRC)/%,$(OBJ_STATIC)/%,$(SRCS:.c=.o))
-OBJS_DYNAMIC := $(patsubst $(SRC)/%,$(OBJ_DYNAMIC)/%,$(SRCS:.c=.o))
+OBJS_STATIC  := $(patsubst $(SRC)/%.cpp,$(OBJ_STATIC)/%.o,$(SRCS))
+OBJS_DYNAMIC := $(patsubst $(SRC)/%.cpp,$(OBJ_DYNAMIC)/%.o,$(SRCS))
 
 .PHONY: all clean directories static dynamic deps
 
@@ -53,12 +53,12 @@ all: directories static dynamic
 directories:
 	@$(MKDIR_CMD)
 
-$(OBJ_STATIC)/%.o: $(SRC)/%.c
+$(OBJ_STATIC)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c $< -o $@
 	@echo " [CC] $<"
 
-$(OBJ_DYNAMIC)/%.o: $(SRC)/%.c
+$(OBJ_DYNAMIC)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(dir $@)
 	@$(CC) $(CFLAGS) -c $< -o $@ -DBUILDING_DLL
 	@echo " [CC] $<"

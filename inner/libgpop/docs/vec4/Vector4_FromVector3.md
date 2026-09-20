@@ -1,15 +1,14 @@
-# Vector4_FromVector3
+# Vector4::FromVector3
 
-```c
-Vector4* Vector4_FromVector3(Vector3* v3, int64_t w, err* Err);
+```cpp
+static Vector4* FromVector3(const Vector3& v3, int64_t w);
 ```
 
-Creates a 4D vector from a 3D vector and a specified W-component.
+Creates a `Vector4` from a `Vector3` and a W component.
 
 ### Parameters
-- `v3`: Pointer to the source `Vector3`.
-- `w`: W-component for the new vector.
-- `Err`: Pointer to an error code (`err`) destination.
+- `v3`: Source `Vector3`.
+- `w`: Initial W component.
 
 ### Returns
-Pointer to a newly allocated `Vector4`, or `NULL` on failure.
+Pointer to new `Vector4`.

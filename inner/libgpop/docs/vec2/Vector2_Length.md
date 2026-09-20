@@ -1,14 +1,13 @@
-# Vector2_Length
+# Vector2::Length
 
-```c
-double Vector2_Length(Vector2* a, err* Err);
+```cpp
+double Length(err* Err) const;
 ```
 
-Calculates the geometric length (magnitude) of the vector `a`.
+Calculates the geometric length (magnitude) of the current vector.
 
 ### Parameters
-- `a`: Pointer to the `Vector2`.
-- `Err`: Pointer to an error code (`err`) destination. It will be set to `EV2_SUCCESS` on success, `EV2_NULLVEC` if `a` is `NULL`, or `EV2_UNDERFLOW` if any coordinate contains `INT64_MIN`.
+- `Err`: Pointer to an error code (`err`) destination. It will be set to `EV2_SUCCESS` on success or `EV2_UNDERFLOW` if any coordinate contains `INT64_MIN`.
 
 ### Returns
-The length of the vector as a `double`, or a negative value on error.
+The length of the vector as a `double`.

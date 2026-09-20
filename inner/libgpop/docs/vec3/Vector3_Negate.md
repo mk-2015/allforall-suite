@@ -1,15 +1,11 @@
-# Vector3_Negate
+# Vector3::Negate
 
-```c
-err Vector3_Negate(Vector3* a);
+```cpp
+err Negate();
 ```
 
-Negates components of the vector `a` (`a.x = -a.x`, `a.y = -a.y`, `a.z = -a.z`).
-
-### Parameters
-- `a`: Pointer to the target `Vector3`.
+Negates all components of the current vector (`this.x = -this.x`, `this.y = -this.y`, `this.z = -this.z`).
 
 ### Returns
 - `EV3_SUCCESS` on success.
-- `EV3_NULLVEC` if the vector is `NULL`.
-- `EV3_UNDERFLOW` if any component contains `INT64_MIN` (which cannot be negated).
+- `EV3_UNDERFLOW` if any component is `INT64_MIN` (which cannot be negated).

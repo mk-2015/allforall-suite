@@ -1,15 +1,14 @@
-# Vector4_Distance
+# Vector4::Distance
 
-```c
-double Vector4_Distance(Vector4* a, Vector4* b, err* Err);
+```cpp
+double Distance(const Vector4& b, err* Err) const;
 ```
 
-Calculates the Euclidean distance between vector `a` and vector `b` in 4D space.
+Calculates Euclidean distance between this vector and `b`.
 
 ### Parameters
-- `a`: Pointer to the first `Vector4`.
-- `b`: Pointer to the second `Vector4`.
-- `Err`: Pointer to an error code (`err`) destination. It will be set to `EV4_SUCCESS` on success, `EV4_NULLVEC` if either vector is `NULL`, or `EV4_UB` if calculation steps overflow or hit undefined boundaries.
+- `b`: Const reference to second `Vector4`.
+- `Err`: Pointer to error code.
 
 ### Returns
-The distance between the two vectors as a `double`, or a negative value on error.
+Distance as `double`.

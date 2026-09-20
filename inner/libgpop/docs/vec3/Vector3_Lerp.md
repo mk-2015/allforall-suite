@@ -1,17 +1,16 @@
-# Vector3_Lerp
+# Vector3::Lerp
 
-```c
-err Vector3_Lerp(Vector3* a, Vector3* b, double t, Vector3* out, err* Err);
+```cpp
+err Lerp(const Vector3& b, double t, Vector3& out, err* Err) const;
 ```
 
-Performs linear interpolation between vector `a` and vector `b` by factor `t`.
+Linearly interpolates between this vector and `b`.
 
 ### Parameters
-- `a`: Pointer to the starting `Vector3`.
-- `b`: Pointer to the ending `Vector3`.
-- `t`: Interpolation factor, typically between 0.0 and 1.0.
-- `out`: Pointer to the `Vector3` where the interpolated components will be stored.
-- `Err`: Pointer to an error code (`err`) destination.
+- `b`: Target `Vector3`.
+- `t`: Factor (0.0 to 1.0).
+- `out`: Destination `Vector3`.
+- `Err`: Pointer to error code.
 
 ### Returns
-`EV3_SUCCESS` on success, or an error code if calculation fails.
+- `EV3_SUCCESS` on success.

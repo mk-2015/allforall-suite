@@ -1,15 +1,14 @@
-# Vector4_Dot
+# Vector4::Dot
 
-```c
-double Vector4_Dot(Vector4* a, Vector4* b, err* Err);
+```cpp
+double Dot(const Vector4& b, err* Err) const;
 ```
 
-Calculates the dot product of vector `a` and vector `b`.
+Calculates the dot product.
 
 ### Parameters
-- `a`: Pointer to the first `Vector4`.
-- `b`: Pointer to the second `Vector4`.
-- `Err`: Pointer to an error code (`err`) destination. It will be set to `EV4_SUCCESS` on success, `EV4_NULLVEC` if either vector is `NULL`, or `EV4_UB` if calculations hit overflow or undefined boundaries.
+- `b`: Const reference to second `Vector4`.
+- `Err`: Pointer to error code.
 
 ### Returns
-The dot product as a `double`, or a negative error code representation.
+Dot product as `double`.

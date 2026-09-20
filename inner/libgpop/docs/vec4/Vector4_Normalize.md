@@ -1,16 +1,13 @@
-# Vector4_Normalize
+# Vector4::Normalize
 
-```c
-err Vector4_Normalize(Vector4* a, Vector4* out);
+```cpp
+err Normalize(Vector4& out) const;
 ```
 
-Normalizes the vector `a` to a unit vector of length 1.
+Normalizes the vector to a unit vector.
 
 ### Parameters
-- `a`: Pointer to the target `Vector4`.
-- `out`: Pointer to the `Vector4` where the normalized components will be stored.
+- `out`: Destination `Vector4`.
 
 ### Returns
 - `EV4_SUCCESS` on success.
-- `EV4_NULLVEC` if any pointer is `NULL`.
-- `EV4_UB` if the vector length is 0 (cannot normalize a zero vector).

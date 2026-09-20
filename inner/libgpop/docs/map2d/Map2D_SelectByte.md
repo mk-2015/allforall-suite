@@ -4,4 +4,9 @@
 void Map2D_SelectByte(Map2D* Map, unsigned long long x, unsigned long long y);
 ```
 
-Selects the byte at coordinates `x`, `y` for subsequent operations.
+Selects a byte.
+
+### Parameters
+- `Map`: Pointer to `Map2D`.
+- `x`: X position.
+- `y`: Y position.

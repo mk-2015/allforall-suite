@@ -1,17 +1,16 @@
-# Vector4_Lerp
+# Vector4::Lerp
 
-```c
-err Vector4_Lerp(Vector4* a, Vector4* b, double t, Vector4* out, err* Err);
+```cpp
+err Lerp(const Vector4& b, double t, Vector4& out, err* Err) const;
 ```
 
-Performs linear interpolation between vector `a` and vector `b` by factor `t`.
+Linearly interpolates between this vector and `b`.
 
 ### Parameters
-- `a`: Pointer to the starting `Vector4`.
-- `b`: Pointer to the ending `Vector4`.
-- `t`: Interpolation factor, typically between 0.0 and 1.0.
-- `out`: Pointer to the `Vector4` where the interpolated components will be stored.
-- `Err`: Pointer to an error code (`err`) destination.
+- `b`: Target `Vector4`.
+- `t`: Factor (0.0 to 1.0).
+- `out`: Destination `Vector4`.
+- `Err`: Pointer to error code.
 
 ### Returns
-`EV4_SUCCESS` on success, or an error code if calculation fails.
+- `EV4_SUCCESS` on success.

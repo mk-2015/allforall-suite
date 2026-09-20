@@ -4,4 +4,4 @@
 void Map2D_Deinit(Map2D* Map);
 ```
 
-Frees the memory allocated for the `Map2D` grid.
+Frees the map resources.

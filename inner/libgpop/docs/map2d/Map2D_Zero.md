@@ -4,4 +4,7 @@
 void Map2D_Zero(Map2D* Map);
 ```
 
-Resets all bytes in the `Map2D` grid to zero.
+Sets all bytes in the map to zero.
+
+### Parameters
+- `Map`: Pointer to `Map2D`.

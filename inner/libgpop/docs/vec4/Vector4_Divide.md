@@ -1,16 +1,14 @@
-# Vector4_Divide
+# Vector4::Divide
 
-```c
-err Vector4_Divide(Vector4* a, Vector4* b);
+```cpp
+err Divide(const Vector4& b);
 ```
 
-Divides vector `a` components by vector `b` components (`a = a / b`), with division by zero safety.
+Divides current vector components by vector `b` components (`this.x /= b.x`, `this.y /= b.y`, `this.z /= b.z`, `this.w /= b.w`), with division by zero safety.
 
 ### Parameters
-- `a`: Pointer to the destination/first operand `Vector4`.
-- `b`: Pointer to the source/second operand `Vector4`.
+- `b`: Const reference to the source `Vector4`.
 
 ### Returns
 - `EV4_SUCCESS` on success.
-- `EV4_NULLVEC` if either vector is `NULL`.
-- `EV4_DIVBY0` if any coordinate of `b` is `0` or division would overflow.
+- `EV4_DIVBY0` if any coordinate of `b` is `0`.

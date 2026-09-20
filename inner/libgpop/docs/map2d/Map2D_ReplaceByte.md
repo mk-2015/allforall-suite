@@ -4,4 +4,4 @@
 void Map2D_ReplaceByte(Map2D* Map, uint8_t byte);
 ```
 
-Replaces the selected byte in the `Map2D` grid with the provided `byte`.
+Replaces the selected byte.

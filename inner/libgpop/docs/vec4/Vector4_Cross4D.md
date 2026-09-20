@@ -1,14 +1,15 @@
-# Vector4_Cross4D
+# Vector4::Cross4D
 
-```c
-err Vector4_Cross4D(Vector4* a, Vector4* b, Vector4* c, Vector4* out);
+```cpp
+err Cross4D(const Vector4& b, const Vector4& c, Vector4& out) const;
 ```
 
-Calculates the 4D cross product (wedge product of three vectors) and stores the result in `out`.
+Calculates the 4D cross product (pseudo-cross product) of the current vector and vectors `b` and `c`, storing result in `out`.
 
 ### Parameters
-- `a`, `b`, `c`: Pointers to the input `Vector4` operands.
-- `out`: Pointer to the `Vector4` where the result will be stored.
+- `b`: Const reference to second `Vector4`.
+- `c`: Const reference to third `Vector4`.
+- `out`: Destination `Vector4`.
 
 ### Returns
-`EV4_SUCCESS` on success, or `EV4_NULLVEC` if any pointer is `NULL`.
+- `EV4_SUCCESS` on success.
