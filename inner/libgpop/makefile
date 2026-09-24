@@ -12,30 +12,45 @@ DYNAMIC_WINDOWS_LIB := $(TARGET).dll
 DYNAMIC_LINUX_LIB := $(TARGET)-linux.so
 
 CC      := g++
-AR	    := ar
+AR      := ar
 CFLAGS  := -I$(INCLUDE) -fPIC -Wall -Wextra -O3 -std=c++17
 
 OBJ_STATIC  := $(OBJ)/static
 OBJ_DYNAMIC := $(OBJ)/dynamic
 
 ENABLE_ARCHNATIV ?= 0
+ENABLE_SODIUM    ?= 1
+FNOEXCEPT        ?= 1
 
 ifeq ($(ENABLE_ARCHNATIV), 1)
     CFLAGS += -march=native -flto
 endif
 
-ifeq ($(OS),Windows_NT)
-	TARGET_DYLIB  := $(DYNAMIC_WINDOWS_LIB)
-	TARGET_STATIC := $(STATIC_WINDOWS_LIB)
-	LDFLAGS       := -shared
-	CLEAN_CMD     := rm -rf $(OBJ) $(LIB)
-	MKDIR_CMD     := mkdir -p $(INCLUDE) $(SRC) $(LIB) $(OBJ) $(OBJ_STATIC) $(OBJ_DYNAMIC)
+ifeq ($(FNOEXCEPT), 1)
+    CFLAGS += -fno-exceptions
 else
-	TARGET_DYLIB  := $(DYNAMIC_LINUX_LIB)
-	TARGET_STATIC := $(STATIC_LINUX_LIB)
-	LDFLAGS       := -shared
-	CLEAN_CMD     := rm -rf $(OBJ) $(LIB)
-	MKDIR_CMD     := mkdir -p $(INCLUDE) $(SRC) $(LIB) $(OBJ) $(OBJ_STATIC) $(OBJ_DYNAMIC)
+    CFLAGS += -DSTAK_EXCEPTIONS
+endif
+
+ifeq ($(ENABLE_SODIUM), 1)
+    CFLAGS += -DHAVE_SODIUM
+    LIBS   += -lsodium
+else
+    LIBS   :=
+endif
+
+ifeq ($(OS),Windows_NT)
+    TARGET_DYLIB  := $(DYNAMIC_WINDOWS_LIB)
+    TARGET_STATIC := $(STATIC_WINDOWS_LIB)
+    LDFLAGS       := -shared
+    CLEAN_CMD     := rm -rf $(OBJ) $(LIB)
+    MKDIR_CMD     := mkdir -p $(INCLUDE) $(SRC) $(LIB) $(OBJ) $(OBJ_STATIC) $(OBJ_DYNAMIC)
+else
+    TARGET_DYLIB  := $(DYNAMIC_LINUX_LIB)
+    TARGET_STATIC := $(STATIC_LINUX_LIB)
+    LDFLAGS       := -shared
+    CLEAN_CMD     := rm -rf $(OBJ) $(LIB)
+    MKDIR_CMD     := mkdir -p $(INCLUDE) $(SRC) $(LIB) $(OBJ) $(OBJ_STATIC) $(OBJ_DYNAMIC)
 endif
 
 SRCS := $(shell find $(SRC) -name "*.cpp")
@@ -66,7 +81,7 @@ $(OBJ_DYNAMIC)/%.o: $(SRC)/%.cpp
 dynamic: $(TARGET_DYLIB)
 
 $(TARGET_DYLIB): $(OBJS_DYNAMIC)
-	@$(CC) $(LDFLAGS) -o $@ $^
+	@$(CC) $(LDFLAGS) -o $@ $^ $(LIBS)
 	@echo " [LD] $@"
 
 static: $(TARGET_STATIC)
