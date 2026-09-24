@@ -1,5 +1,8 @@
 # Tool index
 
+- [bgrep](./bgrep.md)
+- [bmerge](./bmerge.md)
+- [bsplit](./bsplit.md)
 - [filecmp](./filecmp.md)
 - [hashbin](./hashbin.md)
 - [bin2clang](./bin2clang.md)
