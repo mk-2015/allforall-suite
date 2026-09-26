@@ -2,6 +2,22 @@
 - ***This project is still in development! Dont use in production!***
 - ***I am not responsible to damages that occours if production is damaged!***
 
+## Dependencies
+- alltools: 
+    - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
+- hpm:
+    - [miniz](https://github.com/richgel999/miniz)
+    - sqlite3 (system)
+    - libyaml (system)
+    - libcurl (system)
+    - OpenSSL (system)
+    - zlib (system)
+- bintool:
+    - OpenSSL (system)
+    - [LIEF](https://lief-project.github.io/) (system)
+- libgpop:
+    - [libsodium](https://libsodium.org/) (system)
+
 # All For All
 - Is an opensource tool library for os-admins
 - Is written in C++ for blazing fast applications and code readibility. So, other people can join.

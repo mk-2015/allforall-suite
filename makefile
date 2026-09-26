@@ -5,10 +5,17 @@ INC   := outinclude
 INNER := inner
 OUT   := out
 
+WAIRSH ?= 0
+
 CC      := g++
 CCFLAGS := -Wall -Wextra -std=c++17
 
-SUBPROJECTS := $(wildcard $(INNER)/*)
+SUBPROJECTS_ALL := $(wildcard $(INNER)/*)
+ifeq ($(WAIRSH),1)
+    SUBPROJECTS := $(SUBPROJECTS_ALL)
+else
+    SUBPROJECTS := $(filter-out $(INNER)/airsh, $(SUBPROJECTS_ALL))
+endif
 
 ifeq ($(OS),Windows_NT)
     UNAME_S := Windows
@@ -34,7 +41,7 @@ endif
 
 .PHONY: all setup build_subprojects deploy clean deps
 
-deps: 
+deps:
 	@for dir in $(SUBPROJECTS); do \
 		if [ -f "$$dir/Makefile" ] || [ -f "$$dir/makefile" ]; then \
 			$(MAKE) -C $$dir deps; \
@@ -101,7 +108,7 @@ all: setup build_subprojects deploy
 
 clean:
 	rm -rf $(BIN) $(LIB) $(INC) $(OUT)
-	@for dir in $(SUBPROJECTS); do \
+	@for dir in $(SUBPROJECTS_ALL); do \
 		if [ -f "$$dir/Makefile" ] || [ -f "$$dir/makefile" ]; then \
 			$(MAKE) -C $$dir clean; \
 		fi; \

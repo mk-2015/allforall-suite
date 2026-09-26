@@ -21,4 +21,5 @@ obj/
 out/
 outinclude/
 idea.txt
+mpv-test.noinclude.1.json
 mpv-test.noinclude.json
