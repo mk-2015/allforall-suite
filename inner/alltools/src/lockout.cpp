@@ -53,26 +53,26 @@ bool terminate_session(int shutdown_flag) {
             return true;
         }
     }
-    
+
     return false;
 #endif
 }
 
 void _sleep(double milliseconds) {
     auto start = std::chrono::high_resolution_clock::now();
-    
+
     if (milliseconds > 2.0) {
         std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(milliseconds - 2.0));
     }
-    
+
     while (true) {
         auto now = std::chrono::high_resolution_clock::now();
         double elapsed = std::chrono::duration<double, std::milli>(now - start).count();
-        
+
         if (elapsed >= milliseconds) {
-            break; 
+            break;
         }
-        
+
         if (milliseconds - elapsed > 0.1) {
             std::this_thread::yield();
         }
@@ -81,7 +81,7 @@ void _sleep(double milliseconds) {
 
 int main(int argc, char* argv[]) {
     std::cout << "mk-2015 (C) allforall tools, Lockout tool\n";
-    
+
 	int is_sleep = 0;
 	double sleep_time = 0.0;
 	int shutdown = 0;
@@ -92,7 +92,7 @@ int main(int argc, char* argv[]) {
 
 		if (arg == "-s" || arg == "--sleep")
 		{
-			if (i + 1 < argc) 
+			if (i + 1 < argc)
 			{
 				is_sleep = 1;
 				sleep_time = std::stod(argv[++i]);
@@ -103,15 +103,18 @@ int main(int argc, char* argv[]) {
         {
             shutdown = 1;
         }
-		
+
 		if (arg == "-h"  || arg == "--help")
 		{
 			std::cout << "-s or --sleep := sleep for exact millisecond time\n";
-		}
+            std::exit(1);
+            // ^
+            // |- Hours wasted: 43 fixing this stupid control flow bug
+        }
 	}
-	
-	if(is_sleep == 1 && sleep_time < 0.0) _sleep(sleep_time);
-	
+
+	if(is_sleep == 1 && sleep_time > 0.0) _sleep(sleep_time);
+
     if (terminate_session(shutdown)) {
         return 0;
     }
