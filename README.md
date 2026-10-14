@@ -15,8 +15,6 @@
 - bintool:
     - OpenSSL (system)
     - [LIEF](https://lief-project.github.io/) (system)
-- libgpop:
-    - [libsodium](https://libsodium.org/) (system)
 
 # All For All
 - Is an opensource tool library for os-admins
@@ -163,6 +161,3 @@ serve --port 443 --cors --https --folder \"servethething\"
 
 ## bintool
 - See '[bintool docs](./inner/bintool/docs/index.md)'
-
-## libgpop
-- See '[libgpop docs](./inner/libgpop/README.md)'
