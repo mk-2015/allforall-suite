@@ -27,7 +27,7 @@ INC       := include
 
 CC        := g++
 CCFLAGS   := -Wall -Wextra -std=c++17 -I$(INC)
-LINKFLAGS := 
+LINKFLAGS :=
 
 ifeq ($(OS_TYPE),LINUX)
     CCFLAGS   += -pthread
@@ -64,12 +64,12 @@ deps:
 $(BIN)/%: $(OBJ)/%.o
 	@mkdir -p $(BIN)
 	@echo " [LINK] $< -> $@"
-	$(CC) $< $(LINKFLAGS) -o $@
+	@$(CC) $< $(LINKFLAGS) -o $@
 
 $(OBJ)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(OBJ)
 	@echo " [CC] $<"
-	$(CC) $(CCFLAGS) -c $< -o $@
+	@$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:
 	rm -rf $(BIN) $(OBJ)
