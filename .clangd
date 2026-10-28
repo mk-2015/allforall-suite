@@ -1,0 +1,7 @@
+CompileFlags:
+  Add:
+    - -Iinner/alltools/include
+    - -Iinner/bintool/include
+    - -Iinner/hpm/include
+    - -Iinner/libdot3/include
+    - -Iinner/libgpop/include

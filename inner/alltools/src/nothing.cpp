@@ -2,23 +2,23 @@
 #include <chrono>
 #include <thread>
 #include <string_view>
-#include <string> 
+#include <string>
 
 void _sleep(double milliseconds) {
     auto start = std::chrono::high_resolution_clock::now();
-    
+
     if (milliseconds > 2.0) {
         std::this_thread::sleep_for(std::chrono::duration<double, std::milli>(milliseconds - 2.0));
     }
-    
+
     while (true) {
         auto now = std::chrono::high_resolution_clock::now();
         double elapsed = std::chrono::duration<double, std::milli>(now - start).count();
-        
+
         if (elapsed >= milliseconds) {
-            break; 
+            break;
         }
-        
+
         if (milliseconds - elapsed > 0.1) {
             std::this_thread::yield();
         }
@@ -32,20 +32,22 @@ int main(int argc, char* argv[]) {
             std::cout << "mk-2015 (C) allforall tools, Nothing tool\n";
         }
     }
-    
+
     double time = -1.0;
+    int exit_code = 0;
 
     for (int i = 1; i < argc; ++i) {
         std::string_view arg = argv[i];
 
         if (arg == "-h" || arg == "--help") {
-            std::cout << "-h or --help  := help menu\n";
-            std::cout << "-s or --sleep := sleep in milliseconds\n";
+            std::cout << "-h or --help      := help menu\n";
+            std::cout << "-s or --sleep     := sleep in milliseconds\n";
+            std::cout << "-e or --exit-code := exit with specified integer code\n";
 			return 0;
         } else if (arg == "-s" || arg == "--sleep") {
-            if (i + 1 < argc) { 
+            if (i + 1 < argc) {
                 try {
-                    time = std::stod(argv[++i]); 
+                    time = std::stod(argv[++i]);
                 } catch (...) {
                     std::cerr << "Error: Invalid number format for sleep duration.\n";
                     return 1;
@@ -54,12 +56,24 @@ int main(int argc, char* argv[]) {
                 std::cerr << "Error: " << arg << " requires millisecond parameter.\n";
                 return 1;
             }
+        } else if (arg == "-e" || arg == "--exit-code") {
+            if (i + 1 < argc) {
+                try {
+                    exit_code = std::stoi(argv[++i]);
+                } catch (...) {
+                    std::cerr << "Error: Invalid integer format for exit code.\n";
+                    return 1;
+                }
+            } else {
+                std::cerr << "Error: " << arg << " requires integer parameter.\n";
+                return 1;
+            }
         }
     }
-    
+
     if (time >= 0.0) {
         _sleep(time);
     }
-    
-    return 0;
+
+    return exit_code;
 }

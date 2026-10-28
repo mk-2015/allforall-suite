@@ -1,163 +1,169 @@
 # WARNING
-- ***This project is still in development! Dont use in production!***
-- ***I am not responsible to damages that occours if production is damaged!***
+
+- ***This project is still in development! Don't use in production!***
+- ***I am not responsible for damages that occur if production environments are damaged!***
 
 ## Dependencies
-- alltools: 
-    - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
-- hpm:
-    - [miniz](https://github.com/richgel999/miniz)
-    - sqlite3 (system)
-    - libyaml (system)
-    - libcurl (system)
-    - OpenSSL (system)
-    - zlib (system)
-- bintool:
-    - OpenSSL (system)
-    - [LIEF](https://lief-project.github.io/) (system)
+
+- **alltools:**
+  - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
+- **hpm:**
+  - [miniz](https://github.com/richgel999/miniz)
+  - sqlite3 (system)
+  - libyaml (system)
+  - libcurl (system)
+  - OpenSSL (system)
+  - zlib (system)
+- **bintool:**
+  - OpenSSL (system)
+  - [LIEF](https://lief-project.github.io/) (system)
 
 # All For All
-- Is an opensource tool library for os-admins
-- Is written in C++ for blazing fast applications and code readibility. So, other people can join.
-- Is a massive toolkit (SOON...)
 
-- build:
-	* Support:
-		- 1. Windows 
-		- 2. Linux
-		- 3. BSD
-		- 4. MacOs (Never)
-	* Requirements:
-		- 1. internet
-		- 2. gcc and make
-	* steps:
-		- step 1: clone the repo:
-			```bash
-			git clone --depth 1 https://github.com/mk-2015/allforall-suite
-			```
-		- step 2: cd and build:
-			```bash
-			cd allforall-suite && make deps install # Note make install executes make all before copying.
-			```
-		- step 3: reboot to guarantee max package changes:
-			* linux/BSD:
-			```bash
-			sudo reboot
-			```
-			
-			* windows:
-			```cmd
-			shutdown /r /t 0
-			```
-		- step 4: enjoy!
-		
+- An open-source tool library for OS administrators.
+- Written in C++ for blazing-fast applications and code readability, welcoming contributors.
+- A massive toolkit (coming soon...).
+
+## Build & Installation
+
+- **Supported Platforms:**
+  1. Windows
+  2. Linux
+  3. BSD
+  4. macOS (Not supported)
+- **Requirements:**
+  - Internet connection
+  - GCC and Make
+- **Steps:**
+  - **Step 1:** Clone the repository:
+    ```bash
+    git clone --depth 1 https://github.com/mk-2015/allforall-suite
+    ```
+  - **Step 2:** Navigate and build:
+    ```bash
+    cd allforall-suite && make deps install # Note: 'make install' executes 'make all' before copying.
+    ```
+  - **Step 3:** Reboot to ensure package changes take full effect:
+    - Linux/BSD:
+      ```bash
+      sudo reboot
+      ```
+    - Windows:
+      ```cmd
+      shutdown /r /t 0
+      ```
+  - **Step 4:** Enjoy!
+
 ## alltools
-- Binary tools for quick code writing in bash or batch
-- Written in cpp
 
-### Nothing tool
-- The nothing tools does... as you guessed nothing
-- The normal mode:
-```bash
-nothing
-```
-* Does nothing.
-* Thats it, don't expect more.
-	
-- Sleeping mode:
-```bash
-nothing -s 1000 # Sleeps for 1 second or 1000 Milliseconds.
-```
-* Sleeps while doing nothing
-* Thats it, again.
-	
-### Lockout tool
-- Logout from a machine
-- the normal mode:
-```bash
-lockout # Logout
-```
-* Logs out of the machine with specified API of the platform
-* Cross-platform
-- Sleep mode:
-```bash
-lockout -s 1000 # Sleep for 1Second or 1000ms
-```
-- Shudown mode:
-```bash
-lockout -shut
-```
-or
-```bash
-lockout --shutdown
-```
-* Sleeps for specified time until logout
+- Binary tools for quick automation in bash or batch.
+- Written in C++.
 
-### Serve tool
-- Create a server from a machine
-- Start a server at 0.0.0.0:8080/ from the . folder
-```bash
-serve
-```
-* Serves files from 8080 from the . folder
-```bash
-serve --port 443 --cors --https --folder \"servethething\"
-```
-* serves from port 443
-* adds CORS Headers
-* uses https SSL
-* serves from the servethething folder
+### Nothing Tool
 
-### Cursor tool
-- Also known as ```'spinner'``` makes a cool spinner for loading, but you don't know the time it will end at. Mouth full. 
-- Bunch of flags:
-	* -d or --d flag:
-		* Requires a millisecond argument
-		* Time to sleep before next character
-	* --cmd "command to /run" flag:
-		* Is required
-		* Command to run until finished.
-	* -th or --theme flag:
-		* Is not required
-		* Default theme is classic
-		* Themes:
-			- classic
-			- num-wheel
-			- ark
-			- updot
-	* -v or --verbose flag:
-		* Makes everything verbose
-	
-	* -c or --copyright flag:
-		* shows copyright.
-		
-### fwipe tool
-- File wiper utility
-- Flags:
-	* -f or --file <FILE> Flag:
-		- Required
-		- Specifiy file to delete
-		
-	* -h or --help Flag:
-		- Not Required
-		- Bring up help menu
-		
-### dwipe tool
-- Directory wiper utility 
-- Flags:
-	* -d or --dir Flag:
-		- Required
-		- Specifiy directory to delete
-		
-	* -h or -help Flag:
-		- Not Required
-		- Bring up help menu
+- The nothing tool does... as you guessed, nothing.
+- **Normal mode:**
+  ```bash
+  nothing
+  ```
+  - Does nothing. That's it, don't expect more.
 
-## libdot3
-- See '[libdot3 docs](./inner/libdot3/README.md)'
+- **Sleeping mode:**
+  ```bash
+  nothing -s 1000 # Sleeps for 1 second or 1000 milliseconds.
+  ```
+  - Sleeps while doing nothing. That's it, again.
+
+### Lockout Tool
+
+- Logout from a machine.
+- **Normal mode:**
+  ```bash
+  lockout # Logout
+  ```
+  - Logs out of the machine using platform-specific APIs (cross-platform).
+
+- **Sleep mode:**
+  ```bash
+  lockout -s 1000 # Sleep for 1 second or 1000 ms
+  ```
+
+- **Shutdown mode:**
+  ```bash
+  lockout -shut
+  ```
+  or
+  ```bash
+  lockout --shutdown
+  ```
+  - Sleeps for the specified time until shutdown/logout.
+
+### Serve Tool
+
+- Create a server from a machine.
+- Start a server at `0.0.0.0:8080/` from the current folder:
+  ```bash
+  serve
+  ```
+  - Serves files from port 8080 from the current folder.
+
+  ```bash
+  serve --port 443 --cors --https --folder "servethething"
+  ```
+  - Serves from port 443.
+  - Adds CORS headers.
+  - Uses HTTPS/SSL.
+  - Serves from the `servethething` folder.
+
+### Cursor Tool
+
+- Also known as `'spinner'`. Renders a cool spinner for loading tasks when the completion time is unknown.
+- **Flags:**
+  - `-d` or `--delay`:
+    - Requires a millisecond argument.
+    - Time to sleep before the next character.
+  - `--cmd <command>`:
+    - Required.
+    - Command to run until finished.
+  - `-th` or `--theme`:
+    - Optional.
+    - Default theme is `classic`.
+    - Available themes:
+      - `classic`
+      - `num-wheel`
+      - `ark`
+      - `updot`
+  - `-v` or `--verbose`:
+    - Enables verbose logging.
+  - `-c` or `--copyright`:
+    - Shows copyright information.
+
+### Fwipe Tool
+
+- File wiper utility.
+- **Flags:**
+  - `-f` or `--file <FILE>`:
+    - Required.
+    - Specify file to delete.
+  - `-h` or `--help`:
+    - Optional.
+    - Bring up the help menu.
+
+### Dwipe Tool
+
+- Directory wiper utility.
+- **Flags:**
+  - `-d` or `--dir <DIR>`:
+    - Required.
+    - Specify directory to delete.
+  - `-h` or `--help`:
+    - Optional.
+    - Bring up the help menu.
 
 ## hpm
-- See '[hpm docs](./inner/hpm/README.md)'
+
+- See [hpm docs](./inner/hpm/README.md).
 
 ## bintool
-- See '[bintool docs](./inner/bintool/docs/index.md)'
+
+- See [bintool docs](./inner/bintool/docs/index.md).

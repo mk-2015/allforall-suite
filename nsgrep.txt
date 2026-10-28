@@ -1,0 +1,195 @@
+# Task: Implement `nsgrep` — Nanosecond Grep for AllForAll
+
+You are working inside my existing C++ repository, **AllForAll**. Your task is to implement or refactor `nsgrep`, a fast, portable, grep-like command-line utility.
+
+## 1. Start by inspecting the repository
+
+Before editing anything:
+
+1. Inspect the repository structure, build system, coding conventions, existing utilities, and dependency-management approach.
+2. Find the current `nsgrep` source, headers, tests, and any previous AI-generated implementation.
+3. Review the implementation critically. Do not assume existing code is correct.
+4. Check which utilities, helper libraries, and build targets already exist. Reuse them when appropriate; do not duplicate existing functionality.
+5. Determine how dependencies should be integrated into this project and whether the chosen libraries support the project's target platforms.
+
+Do not replace unrelated files, reorganize the whole repository, or change existing utilities unnecessarily.
+
+## 2. Required matching architecture
+
+Implement a common internal matching interface with separate backends. Select the appropriate backend based on the user's requested matching mode.
+
+### Fixed-string matching: `-F`
+
+Use a dedicated literal-search implementation rather than compiling the input as a regular expression.
+
+- Correctly handle arbitrary literal patterns, including regex metacharacters.
+- Support case-insensitive matching when requested.
+- Support multiple patterns if the CLI design allows them.
+- Optimize large-buffer searches where practical.
+- Use SIMD acceleration only when supported and beneficial, with a correct portable fallback.
+- Never require AVX-512 to run the program.
+- Do not assume that SIMD is always faster; benchmark before claiming performance improvements.
+
+### Standard regex matching: `-G` and `-E`
+
+Evaluate **RE/flex** and **RE2** for their suitability, supported syntax, platform compatibility, and performance.
+
+- Use RE2 as the default safe regex backend if its syntax and semantics meet the selected compatibility contract.
+- Consider RE/flex where its C++ API, scanning capabilities, or SIMD support provide a concrete advantage.
+- Do not blindly chain the engines or compile every pattern in all engines.
+- Define explicit, documented backend-selection rules.
+- Preserve predictable behavior and report unsupported regex syntax clearly.
+
+The project's desired behavior is grep-like. GNU grep's default basic regular expressions and `-E` extended regular expressions have different semantics. Do not silently claim full GNU grep compatibility if the selected backend does not provide it. Document any differences and test them.
+
+### Perl-compatible regex matching: `-P`
+
+Use **PCRE2** for genuine Perl-compatible regex support.
+
+- Do not implement `-P` by simply switching to POSIX extended regex.
+- Compile patterns once and reuse the compiled pattern during scanning.
+- Handle compilation and execution errors cleanly.
+- Use the appropriate PCRE2 API and library variant.
+- Make Unicode and UTF behavior explicit rather than assuming every byte sequence is valid UTF text.
+- Keep optional JIT acceleration optional and provide a fallback when unavailable.
+
+### Common interface
+
+Design an interface that separates pattern compilation from matching. For example, conceptually:
+
+- Compile a pattern and return an error on failure.
+- Match a line or buffer.
+- Return match spans when highlighting or `-o` requires them.
+- Support case sensitivity and the selected matching mode.
+- Expose capabilities where backends differ.
+- Manage backend resources with RAII.
+
+The example is a design direction, not a demand to use a particular class hierarchy. Choose an implementation that fits the existing repository.
+
+## 3. Grep-style command-line behavior
+
+Inspect the current implementation and preserve useful existing options. Implement or correct the following options where they are already part of the CLI specification:
+
+- `-i`: case-insensitive matching.
+- `-v`: select non-matching lines.
+- `-w`: match whole words.
+- `-x`: match whole lines.
+- `-G`: basic regular expressions.
+- `-E`: extended regular expressions.
+- `-F`: fixed strings.
+- `-P`: PCRE2 patterns.
+- `-n`: print line numbers.
+- `-H` / `-h`: control filename prefixes.
+- `-o`: print only the matching portions.
+- `-c`: count selected lines.
+- `-l` / `-L`: print files with or without selected matches.
+- `-q`: quiet mode.
+- `-s`: suppress appropriate error messages.
+- `-m`: maximum selected lines per input file.
+- `-A`, `-B`, `-C`: after-, before-, and surrounding-context lines.
+- `-r` / `-R`: recursive directory search, with clearly defined symlink behavior.
+- `--include`, `--exclude`, `--exclude-dir`.
+- `--color`.
+- `--byte-offset`.
+- Any other options already implemented and documented in the project.
+
+Do not silently accept unknown options as filenames. Invalid options and invalid numeric arguments should produce useful diagnostics and the appropriate exit status.
+
+Where GNU grep compatibility is intended, verify behavior against it rather than relying on memory.
+
+## 4. Output and matching details
+
+Correctness matters more than the name "Nanosecond Grep."
+
+- Highlight actual matched spans in red when color is enabled.
+- Automatically enable color only when appropriate for the output destination, respecting `NO_COLOR` and explicit user overrides.
+- Ensure `-o` prints correct match spans and handles repeated or adjacent matches according to the documented semantics.
+- Do not copy the entire remaining line for every successive match unnecessarily.
+- Implement binary-file handling deliberately. Do not pass arbitrary binary data to a NUL-terminated regex API and pretend it matched the entire buffer.
+- If binary bytes are displayed, support the specified `<0xBYTE>` representation and blue coloring when enabled.
+- Implement escape-sequence normalization only if it has a clear, documented purpose. If enabled, apply it consistently and use the specified purple coloring for normalized escape sequences.
+- Keep matching, decoding, normalization, and rendering as distinct operations so display transformations do not accidentally change search semantics.
+- Make `-w` behavior portable and documented; do not rely on non-portable POSIX regex extensions.
+- Compute byte offsets correctly, including files whose final line has no newline and files using CRLF line endings.
+- Handle empty patterns, empty lines, very long lines, overlapping match candidates, and patterns containing special characters.
+- Ensure context lines are neither omitted nor printed repeatedly when multiple matches are close together.
+
+## 5. File and directory processing
+
+- Support standard input where appropriate.
+- Handle unreadable files, nonexistent paths, directories, and file read failures cleanly.
+- Preserve the distinction between no matches and an operational error.
+- Use RAII and avoid resource leaks.
+- Avoid following symlink loops during recursive traversal.
+- Do not silently swallow every filesystem exception.
+- Avoid loading entire large files into memory unless a particular feature requires it.
+- Make the implementation portable across supported Linux and BSD environments and Windows toolchains supported by this repository.
+
+Be careful with text-versus-binary semantics and with the limitations of line-oriented APIs such as `std::getline`.
+
+## 6. Portability and performance
+
+AllForAll targets Linux and BSD natively and supports Windows through the project's existing MSYS/Cygwin approach. **Apple/macOS is explicitly excluded.** Follow the repository's actual platform conventions.
+
+- Keep compiler-specific SIMD code isolated.
+- Detect CPU capabilities correctly before executing specialized instructions.
+- Provide a scalar or otherwise portable fallback.
+- Do not use AVX-512, AVX2, SSE, NEON, or other instruction sets without appropriate compile-time and runtime safeguards.
+- Avoid assuming x86-specific intrinsics are available on ARM.
+- Keep dependency requirements and optional features clear in the build configuration.
+- Do not introduce a large dependency merely for a trivial feature without explaining the trade-off.
+
+Prioritize algorithmic efficiency, buffered input, reduced allocations, and compiled-pattern reuse before micro-optimizations.
+
+## 7. Build integration
+
+Integrate `nsgrep` using the existing AllForAll build system and dependency conventions.
+
+- Update only the necessary build files, headers, sources, and documentation.
+- Make dependencies reproducible and clearly declare required versus optional libraries.
+- Ensure a clean build works with the project's normal build commands.
+- Do not claim a dependency is installed or a build has succeeded unless you actually verified it.
+- Do not break the existing `out/bin` deployment layout or unrelated tools.
+
+## 8. Tests
+
+Add automated tests using the repository's existing testing framework, if available. Otherwise, introduce a small focused test setup consistent with the project.
+
+Test at minimum:
+
+1. Literal matching and regex metacharacters under `-F`.
+2. Basic versus extended regex behavior.
+3. PCRE2-only syntax under `-P`.
+4. Invalid patterns and invalid CLI arguments.
+5. Case-insensitive, inverted, whole-word, and whole-line matching.
+6. Multiple matches per line and correct `-o` output.
+7. Filename prefixes, line numbers, byte offsets, and counts.
+8. Before/after context without duplicated lines.
+9. Empty files, empty lines, long lines, and files without a trailing newline.
+10. Binary input containing embedded NUL bytes.
+11. Recursive traversal, exclusion rules, and symlink handling.
+12. Color output when enabled, disabled, or redirected.
+13. No-match, successful-match, and error exit statuses.
+14. Graceful behavior when optional SIMD or JIT features are unavailable.
+
+Where possible, compare relevant output and exit statuses against GNU grep on a compatible development system. Treat differences as explicit compatibility decisions, not automatic proof of a bug or proof of correctness.
+
+## 9. Work process
+
+Proceed in this order:
+
+1. Inspect the repository and current `nsgrep` implementation.
+2. Report the important defects and propose the smallest sensible implementation plan.
+3. Check the available dependencies, platform support, APIs, and build integration before choosing engines.
+4. Implement the matching abstraction and selected backends.
+5. Correct CLI parsing, file scanning, match-span handling, and output formatting.
+6. Add tests and documentation.
+7. Run the available build and test commands.
+8. Fix failures caused by your changes.
+9. Summarize changed files, implemented features, dependency requirements, tests actually run, known limitations, and anything still unfinished.
+
+Do not stop after writing a plan if repository access and implementation tools are available. Carry the work through to a tested implementation.
+
+Do not fabricate test results, benchmarks, compiler support, library capabilities, or GNU grep compatibility. If something cannot be built or tested in the current environment, state that limitation precisely.
+
+**Final goal:** a maintainable, portable, correct, grep-like `nsgrep` utility with a clean matching abstraction, genuine PCRE2 support for `-P`, a dedicated literal-search path for `-F`, and carefully chosen standard-regex backends—not a collection of unverified performance claims.

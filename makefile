@@ -5,17 +5,10 @@ INC   := outinclude
 INNER := inner
 OUT   := out
 
-WAIRSH ?= 0
-
 CC      := g++
 CCFLAGS := -Wall -Wextra -std=c++17
 
 SUBPROJECTS_ALL := $(wildcard $(INNER)/*)
-ifeq ($(WAIRSH),1)
-    SUBPROJECTS := $(SUBPROJECTS_ALL)
-else
-    SUBPROJECTS := $(filter-out $(INNER)/airsh, $(SUBPROJECTS_ALL))
-endif
 
 ifeq ($(OS),Windows_NT)
     UNAME_S := Windows
