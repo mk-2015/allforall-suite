@@ -6,3 +6,5 @@ Welcome to the devutils documentation.
 - [whichall Documentation](whichall.md)
 - [retry Documentation](retry.md)
 - [fill Documentation](fill.md)
+- [run Documentation](run.md)
+

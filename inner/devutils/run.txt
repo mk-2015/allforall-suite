@@ -1,0 +1,13 @@
+run [OPTIONS] app
+
+Runs app with the modifing OPTIONS
+
+OPTIONS:
+    -env:NAME=VALUE      : Set environment varible
+    -stdout:FILE         : Output stdout to FILE
+    -stderr:FILE         : Output stderr to FILE
+    -stdort:FILE         : Output stdout and stderr to FILE
+    -dir:DIR             : Change directory into specified DIR before running program.
+    -q                   : Make `runs` stdout and stderr quiet
+    -i                   : Output PID, ENV Vars, stdout/err redirects, current directory of program.
+    -Q                   : Quit immediatly after launching the program

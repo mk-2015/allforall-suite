@@ -167,3 +167,7 @@
 ## bintool
 
 - See [bintool docs](./inner/bintool/docs/index.md).
+
+## devutils
+
+- See [devutils docs](./inner/devutils//docs/index.md).
