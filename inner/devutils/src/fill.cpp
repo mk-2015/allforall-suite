@@ -29,6 +29,7 @@ struct Options {
     bool randomize = false;
     bool all = true;
     std::uint64_t count = 0;
+    bool count_seen = false;
 };
 
 std::string trim(const std::string& s) {
@@ -381,6 +382,11 @@ Options parse_arguments(int argc, char* argv[]) {
         }
 
         if (options_enabled && arg == "-a") {
+            if (options.count_seen) {
+                throw FillError("-a specified more than once.");
+            }
+            options.count_seen = true;
+
             if (i + 1 >= argc) {
                 throw FillError("Missing argument after -a.");
             }
