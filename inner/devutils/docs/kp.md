@@ -30,21 +30,25 @@ kp [OPTIONS] [INPUT [OUTPUT]]
 ## Examples
 
 # Replace all occurrences of "foo" with "bar" in input.txt and write to output.txt
+
 ```bash
 kp -s foo bar input.txt output.txt
 ```
 
 # Case-insensitive substring replacement reading from stdin
+
 ```bash
 echo "Hello World" | kp -stdin -i -mi -s world universe
 ```
 
 # Count occurrences of a regular expression pattern
+
 ```bash
 kp -c -f -s "[0-9]+" "" data.txt
 ```
 
 # Replace text only within lines 10 through 20
+
 ```bash
 kp -R 10:20 -s error warning log.txt
 ```

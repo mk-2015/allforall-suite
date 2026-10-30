@@ -9,4 +9,5 @@ Welcome to the devutils documentation.
 - [run Documentation](run.md)
 - [buniq Documentation](buniq.md)
 - [kp Documentation](kp.md)
+- [parg Documentation](parg.md)
 
