@@ -7,4 +7,5 @@ Welcome to the devutils documentation.
 - [retry Documentation](retry.md)
 - [fill Documentation](fill.md)
 - [run Documentation](run.md)
+- [buniq Documentation](buniq.md)
 

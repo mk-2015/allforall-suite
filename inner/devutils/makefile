@@ -26,7 +26,7 @@ OBJ       := obj
 INC       := include
 
 CC        := g++
-CCFLAGS   := -Wall -Wextra -std=c++17 -I$(INC)
+CCFLAGS   := -Wall -Wextra -std=c++20 -I$(INC)
 LINKFLAGS :=
 
 ifeq ($(OS_TYPE),LINUX)
