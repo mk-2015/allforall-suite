@@ -8,4 +8,5 @@ Welcome to the devutils documentation.
 - [fill Documentation](fill.md)
 - [run Documentation](run.md)
 - [buniq Documentation](buniq.md)
+- [kp Documentation](kp.md)
 
