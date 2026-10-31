@@ -1,3 +1,4 @@
+.DEFAULT_GOAL := all
 SRC   := src
 LIB   := lib
 BIN   := bin
@@ -8,7 +9,7 @@ OUT   := out
 CC      := g++
 CCFLAGS := -Wall -Wextra -std=c++17
 
-SUBPROJECTS_ALL := $(wildcard $(INNER)/*)
+SUBPROJECTS := $(wildcard $(INNER)/*)
 
 ifeq ($(OS),Windows_NT)
     UNAME_S := Windows

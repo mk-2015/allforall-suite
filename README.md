@@ -1,12 +1,12 @@
 # WARNING
 
-- ***This project is still in development! Don't use in production!***
 - ***I am not responsible for damages that occur if production environments are damaged!***
 
 ## Dependencies
 
 - **devutils:**
   - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
+  - Boost.Multiprecision
 - **bintool:**
   - OpenSSL (system)
   - [LIEF](https://lief-project.github.io/) (system)
@@ -61,8 +61,12 @@ shutdown /r /t 0
 
 ## bintool
 
-- See [bintool docs](./inner/bintool/docs/index.md).
+- See [bintool docs](./utils//bintool/docs/index.md).
 
 ## devutils
 
-- See [devutils docs](./inner/devutils//docs/index.md).
+- See [devutils docs](./utils//devutils//docs/index.md).
+
+## inetin
+
+- See [inetin docs](./utils/inetin/docs/index.md)
