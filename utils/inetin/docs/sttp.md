@@ -50,34 +50,40 @@ sttp [OPTIONS] [SITE]
 ## Examples
 
 - Basic GET request:
-  ```bash
-  sttp https://example.com
-  ```
+  
+```bash
+sttp https://example.com
+```
 
 - Send a POST request with a custom JSON body and header:
-  ```bash
-  sttp -m POST -b '{"status":"active"}' -h Content-Type application/json https://api.example.com/v1/status
-  ```
+
+```bash
+sttp -m POST -b '{"status":"active"}' -h Content-Type application/json https://api.example.com/v1/status
+```
 
 - Download a file using the remote filename:
-  ```bash
-  sttp -Dd https://example.com/downloads/archive.zip
-  ```
+
+```bash
+sttp -Dd https://example.com/downloads/archive.zip
+```
 
 - Follow redirects and display response headers:
-  ```bash
-  sttp -R -rH https://example.com
-  ```
+
+```bash
+sttp -R -rH https://example.com
+```
 
 - Upload a file using PUT:
-  ```bash
-  sttp -m PUT -U payload.bin https://api.example.com/upload
-  ```
+
+```bash
+sttp -m PUT -U payload.bin https://api.example.com/upload
+```
 
 - Verbose request with custom timeout:
-  ```bash
-  sttp -v -t 5000 https://api.example.com/health
-  ```
+  
+```bash
+sttp -v -t 5000 https://api.example.com/health
+```
 
 ## Exit Status
 

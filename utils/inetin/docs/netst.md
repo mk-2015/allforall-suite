@@ -20,31 +20,37 @@ netst [OPTIONS]
 ## Examples
 
 List all network sockets and their owning processes:
+
 ```bash
 netst
 ```
 
 Show sockets matching a specific local port:
+
 ```bash
 netst -p :443
 ```
 
 Show sockets owned by a specific PID:
+
 ```bash
 netst -i 1234
 ```
 
 Find the process path and arguments bound to port 80:
+
 ```bash
 netst -r 80
 ```
 
 Print only the PID bound to port 8080:
+
 ```bash
 netst -pp 8080
 ```
 
 Export socket status as pipe-delimited data:
+
 ```bash
 netst -o
 ```

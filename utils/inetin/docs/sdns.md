@@ -20,21 +20,25 @@ sdns [OPTIONS] SITE
 ## Examples
 
 Query default records (`A`, `AAAA`, `CNAME`) for a domain:
+
 ```bash
 sdns example.com
 ```
 
 Query specific record types (`MX` and `TXT`) using a custom DNS server:
+
 ```bash
 sdns -e MX -e TXT -s 1.1.1.1 example.com
 ```
 
 Use multiple custom DNS servers and write output to a file:
+
 ```bash
 sdns -ss '["1.1.1.1", "8.8.8.8"]' -f dns_results.txt example.com
 ```
 
 Perform a reverse DNS lookup on an IP address:
+
 ```bash
 sdns -x 93.184.216.34
 ```

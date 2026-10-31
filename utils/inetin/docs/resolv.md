@@ -19,21 +19,25 @@ resolv [OPTIONS] [SITE]
 ## Examples
 
 Resolve IPv4 addresses for a domain name:
+
 ```bash
 resolv example.com
 ```
 
 Resolve both IPv4 and IPv6 addresses for a URL:
+
 ```bash
 resolv -a https://example.com/path
 ```
 
 Resolve IPv6 addresses only:
+
 ```bash
 resolv -6 example.com
 ```
 
 Perform a reverse DNS lookup on an IP address:
+
 ```bash
 resolv -r 93.184.216.34
 ```
