@@ -15,3 +15,4 @@ Welcome to the coreutils documentation.
 - [lockout Documentation](lockout.md)
 - [nothing Documentation](nothing.md)
 - [serve Documentation](serve.md)
+- [var Documentation](var.md)

@@ -58,8 +58,8 @@ ifeq ($(OS_TYPE),UNKNOWN)
 endif
 
 deps:
-	@mkdir -p $(INC)
-	curl -L https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h -o $(INC)/httplib.h
+	@mkdir -p $(INC)/boost
+	@curl -L https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h -o $(INC)/httplib.h
 
 
 $(BIN)/%: $(OBJ)/%.o
