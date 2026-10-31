@@ -26,8 +26,8 @@ OBJ       := obj
 INC       := include
 
 CC        := g++
-CCFLAGS   := -Wall -Wextra -std=c++17 -I$(INC)
-LINKFLAGS := 
+CCFLAGS   := -Wall -Wextra -std=c++20s -I$(INC)
+LINKFLAGS :=
 
 ifeq ($(OS_TYPE),LINUX)
     CCFLAGS   += -pthread
@@ -59,7 +59,7 @@ endif
 
 deps:
 	@mkdir -p $(INC)
-	
+
 $(BIN)/%: $(OBJ)/%.o
 	@mkdir -p $(BIN)
 	@echo " [LINK] $< -> $@"

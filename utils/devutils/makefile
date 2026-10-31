@@ -59,6 +59,8 @@ endif
 
 deps:
 	@mkdir -p $(INC)
+	curl -L https://raw.githubusercontent.com/yhirose/cpp-httplib/master/httplib.h -o $(INC)/httplib.h
+
 
 $(BIN)/%: $(OBJ)/%.o
 	@mkdir -p $(BIN)

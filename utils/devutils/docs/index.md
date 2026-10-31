@@ -1,6 +1,6 @@
 # Documentation Index
 
-Welcome to the devutils documentation.
+Welcome to the coreutils documentation.
 
 - [sysrng Documentation](sysrng.md)
 - [whichall Documentation](whichall.md)
@@ -10,4 +10,8 @@ Welcome to the devutils documentation.
 - [buniq Documentation](buniq.md)
 - [kp Documentation](kp.md)
 - [parg Documentation](parg.md)
-
+- [dwipe Documentation](dwipe.md)
+- [fwipe Documentation](fwipe.md)
+- [lockout Documentation](lockout.md)
+- [nothing Documentation](nothing.md)
+- [serve Documentation](serve.md)

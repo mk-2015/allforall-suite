@@ -2,7 +2,7 @@ SRC   := src
 LIB   := lib
 BIN   := bin
 INC   := outinclude
-INNER := inner
+INNER := utils
 OUT   := out
 
 CC      := g++

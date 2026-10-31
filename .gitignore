@@ -17,6 +17,8 @@ Thumbs.db
 .idea/
 
 bin/
+lib/
+./bin/
 obj/
 out/
 outinclude/
