@@ -7,6 +7,9 @@
 - **devutils:**
   - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
   - Boost.Multiprecision
+- **inetin:**
+  - Boost.Asio
+  - c-ares
 - **bintool:**
   - OpenSSL (system)
   - [LIEF](https://lief-project.github.io/) (system)
