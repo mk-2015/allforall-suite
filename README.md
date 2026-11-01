@@ -75,3 +75,7 @@ shutdown /r /t 0
 ## inetin
 
 - See [inetin docs](./utils/inetin/docs/index.md)
+
+## TimeX C++ Library
+
+- See [TimeX docs](./utils/timex/README.md)
