@@ -102,7 +102,7 @@ all: setup build_subprojects deploy
 
 clean:
 	rm -rf $(BIN) $(LIB) $(INC) $(OUT)
-	@for dir in $(SUBPROJECTS_ALL); do \
+	@for dir in $(SUBPROJECTS); do \
 		if [ -f "$$dir/Makefile" ] || [ -f "$$dir/makefile" ]; then \
 			$(MAKE) -C $$dir clean; \
 		fi; \
