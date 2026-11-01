@@ -1,7 +1,7 @@
 CXX = g++
 AR  = ar
 
-CXXFLAGS = -std=c++20 -Wall -Wextra -Wpedantic -O2 -fPIC
+CXXFLAGS = -std=c++20 -Wall -Wextra -Wpedantic -O2 -fPIC -Isrc/
 CPPFLAGS = -Iinclude
 
 SRC = src
@@ -11,7 +11,7 @@ LIB = lib
 STATIC = $(LIB)/libtimex.a
 SHARED = $(LIB)/libtimex.so
 
-SOURCES = $(wildcard $(SRC)/*.cpp)
+SOURCES = $(shell find $(SRC) -type f -name '*.cpp')
 OBJECTS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(SOURCES))
 
 .PHONY: all clean
@@ -19,7 +19,7 @@ OBJECTS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(SOURCES))
 all: $(STATIC) $(SHARED)
 
 $(OBJ)/%.o: $(SRC)/%.cpp
-	@mkdir -p $(OBJ)
+	@mkdir -p $(dir $@)
 	@echo " [CXX] $<"
 	@$(CXX) $(CPPFLAGS) $(CXXFLAGS) -c $< -o $@
 

@@ -128,6 +128,18 @@ public:
 
 ---
 
+## Validation & Error Handling
+
+`tx::Time` enforces strict validation rules on all components:
+- **Hours:** `0` to `23`
+- **Minutes:** `0` to `59`
+- **Seconds:** `0` to `59`
+- **Milliseconds, Microseconds, Nanoseconds:** `0` to `999`
+
+When attempting to assign invalid values using setters (e.g., `set_hour(24)` or `set_minute(60)`), the operation fails safely, returns `false`, and leaves the object's existing valid state unmodified.
+
+---
+
 ## Example Usage
 
 ```cpp

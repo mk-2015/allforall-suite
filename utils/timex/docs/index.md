@@ -1,15 +1,16 @@
 # Timex C++ Library (`tx`)
 
-**Timex** (`tx`) is a lightweight, header-only (or compiled library) C++ date and time manipulation library designed for high performance, ease of use, and robust validation. It provides strongly typed classes for managing times, dates, and combined timestamps with nanosecond precision.
+**Timex** (`tx`) is a compiled library C++ date and time manipulation library designed for high performance, ease of use, and robust validation. It provides strongly typed classes for managing times, dates, and combined timestamps with nanosecond precision.
 
 ---
 
 ## Navigation
 
-- **Classes**
+- **Classes & Subsystems**
   - [`tx::Time`](./time.md) — Time of day with nanosecond precision
   - [`tx::Date`](./date.md) — Calendar date (Year, Month, Day) with leap year support
   - [`tx::Timedate`](./timedate.md) — Combined date and time representation
+  - [`tx::sleep`](./sleep.md) — Cross-platform precision sleep utilities
 - **Reference**
   - [Type Aliases](#type-aliases)
   - [Quick Start](#quick-start)
