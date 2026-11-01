@@ -13,6 +13,7 @@
   - OpenSSL (system)
 - **bintool:**
   - OpenSSL (system)
+  - libCapstone
   - [LIEF](https://lief-project.github.io/) (system)
 
 ## AllForAll
