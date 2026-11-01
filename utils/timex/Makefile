@@ -14,7 +14,7 @@ SHARED = $(LIB)/libtimex.so
 SOURCES = $(shell find $(SRC) -type f -name '*.cpp')
 OBJECTS = $(patsubst $(SRC)/%.cpp,$(OBJ)/%.o,$(SOURCES))
 
-.PHONY: all clean
+.PHONY: all clean deps
 
 all: $(STATIC) $(SHARED)
 
@@ -36,3 +36,6 @@ $(SHARED): $(OBJECTS)
 clean:
 	@rm -rf $(OBJ) $(LIB)
 	@echo " [CLEAN]"
+
+deps:
+	@echo "NONE"
