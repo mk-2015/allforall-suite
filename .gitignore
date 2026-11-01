@@ -16,9 +16,8 @@ Thumbs.db
 .vscode/
 .idea/
 
-bin/
 lib/
-./bin/
+bin/
 obj/
 out/
 outinclude/
@@ -27,3 +26,4 @@ mpv-test.noinclude.1.json
 mpv-test.noinclude.json
 test-*.sh
 test.cpp
+bin
