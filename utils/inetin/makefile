@@ -31,12 +31,12 @@ LINKFLAGS :=
 
 ifeq ($(OS_TYPE),LINUX)
     CCFLAGS   += -pthread
-    LINKFLAGS += -pthread -lcrypto -lcurl -lcares
+    LINKFLAGS += -pthread -lcrypto -lssl -lcurl -lcares
 else ifeq ($(OS_TYPE),BSD)
     CCFLAGS   += -pthread
-    LINKFLAGS += -pthread -lcrypto -lcurl -lcares
+    LINKFLAGS += -pthread -lcrypto -lssl -lcurl -lcares
 else ifneq ($(filter $(OS_TYPE),WINDOWS MSYS),)
-    LINKFLAGS += -lws2_32 -ladvapi32 -lcrypto -lcurl -lcares
+    LINKFLAGS += -lws2_32 -ladvapi32 -lcrypto -lssl -lcurl -lcares
 endif
 
 SOURCES   := $(wildcard $(SRC)/*.cpp)

@@ -10,6 +10,7 @@
 - **inetin:**
   - Boost.Asio
   - c-ares
+  - OpenSSL (system)
 - **bintool:**
   - OpenSSL (system)
   - [LIEF](https://lief-project.github.io/) (system)

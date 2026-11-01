@@ -92,7 +92,7 @@ void usage(std::ostream& out) {
 "Options:\n"
 "  -m METHOD       HTTP method (default: GET)\n"
 "  -b BODY         Request body\n"
-"  -h NAME VALUE   Add a request header (repeatable; VALUE defaults to not-specified)\n"
+"  -H NAME VALUE   Add a request header (repeatable; VALUE defaults to not-specified)\n"
 "  -u USERAGENT    Override the User-Agent\n"
 "  -d FILE         Download to an existing file; fail if it does not exist\n"
 "  -D FILE         Download to FILE, creating it if necessary\n"
@@ -133,7 +133,7 @@ bool parse_args(int argc, char** argv, Config& cfg) {
         const std::string arg = argv[i];
         std::string value;
 
-        if (arg == "--help" || arg == "-?") {
+        if (arg == "--help" || arg == "-h") {
             usage(std::cout);
             std::exit(0);
         } else if (arg == "-m") {
@@ -144,9 +144,9 @@ bool parse_args(int argc, char** argv, Config& cfg) {
         } else if (arg == "-b") {
             if (!need_value(i, argc, argv, "-b", cfg.body)) return false;
             cfg.body_specified = true;
-        } else if (arg == "-h") {
+        } else if (arg == "-H") {
             std::string name;
-            if (!need_value(i, argc, argv, "-h", name)) return false;
+            if (!need_value(i, argc, argv, "-H", name)) return false;
             std::string header_value = "not-specified";
             if (i + 1 < argc && argv[i + 1][0] != '-') header_value = argv[++i];
             cfg.headers.emplace_back(std::move(name), std::move(header_value));
@@ -594,7 +594,7 @@ int run(const Config& cfg) {
 int main(int argc, char** argv) {
     Config config;
     if (!parse_args(argc, argv, config)) {
-        std::cerr << "Try 'sttp --help' for usage.\n";
+        std::cerr << "Try 'sttp --help/-h' for usage.\n";
         return 1;
     }
 
