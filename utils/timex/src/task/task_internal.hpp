@@ -4,8 +4,8 @@
 
 #include <atomic>
 #include <condition_variable>
+#include <memory>
 #include <mutex>
-#include <thread>
 
 namespace tx::task::internal {
 
@@ -19,8 +19,10 @@ enum class State {
 struct Task {
     taskid_t id = 0;
 
+    bool finishing = false;
     Calling call = nullptr;
     Args args = nullptr;
+
     Callee callee = nullptr;
     ResultDeleter deleter = nullptr;
 
@@ -30,13 +32,10 @@ struct Task {
 
     std::atomic<bool> cancel_requested{false};
 
+    bool result_retrieved = false;
+
     std::mutex mutex;
     std::condition_variable condition;
-
-    std::thread worker;
-
-    bool result_retrieved = false;
-    bool worker_joined = false;
 };
 
 }

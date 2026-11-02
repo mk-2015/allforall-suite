@@ -12,16 +12,16 @@ using Callee = void (*)(void*);
 using ResultDeleter = void (*)(void*);
 
 // Error codes
-constexpr int E_TASK_NOT_FINISHED       = 1;
-constexpr int E_TASK_NOT_FOUND          = 2;
-constexpr int E_TASK_CANCELLED          = 3;
-constexpr int E_TASK_TIMEOUT            = 4;
-constexpr int E_TASK_FAILED             = 5;
-constexpr int E_TASK_RESULT_RETRIEVED   = 6;
-constexpr int E_TASK_INVALID_ARGUMENT  = 7;
+constexpr int E_TASK_NOT_FINISHED         = 1;
+constexpr int E_TASK_NOT_FOUND            = 2;
+constexpr int E_TASK_CANCELLED            = 3;
+constexpr int E_TASK_TIMEOUT              = 4;
+constexpr int E_TASK_FAILED               = 5;
+constexpr int E_TASK_RESULT_RETRIEVED     = 6;
+constexpr int E_TASK_INVALID_ARGUMENT     = 7;
 constexpr int E_TASK_RESULT_NOT_RETRIEVED = 8;
-constexpr int E_TASK_DEADLOCK           = 9;
-constexpr int E_TASK_SHUTTING_DOWN      = 10;
+constexpr int E_TASK_DEADLOCK             = 9;
+constexpr int E_TASK_SHUTTING_DOWN        = 10;
 
 // Submit a task asynchronously.
 taskid_t wait_for(
@@ -31,11 +31,11 @@ taskid_t wait_for(
     ResultDeleter deleter = nullptr
 );
 
-// Wait for an existing task to finish.
+// Wait for an existing task.
 int wait_for(taskid_t taskid);
 
-// Submit a task and wait for its completion.
-// timeout = 0 means wait indefinitely.
+// Submit a task and wait for completion.
+// timeout is in milliseconds. Zero means infinite.
 int wait_until(
     Calling call,
     Args args,
@@ -46,19 +46,19 @@ int wait_until(
 );
 
 // Retrieve a completed task's result.
-// Ownership of the result transfers to the caller.
+// Ownership transfers to the caller.
 void* retrieve_result(taskid_t taskid, int* e = nullptr);
 
 // Request cooperative cancellation.
 void cancel(taskid_t taskid);
 
-// Delete completed task metadata and any safely disposable result.
+// Delete a completed task.
 int del_task(taskid_t taskid);
 
-// Check whether the currently executing task was asked to cancel.
+// Check cancellation from inside a task function.
 bool cancellation_requested();
 
-// Stop the task system and join its workers.
+// Permanently stop the task system.
 int shutdown();
 
 }

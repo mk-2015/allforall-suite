@@ -4,12 +4,11 @@
 #include "task_internal.hpp"
 
 #include <atomic>
-#include <vector>
 #include <memory>
 #include <mutex>
 #include <thread>
 #include <unordered_map>
-#include <utility>
+#include <vector>
 
 namespace tx::task {
 namespace {
@@ -18,14 +17,19 @@ using internal::State;
 using internal::Task;
 
 std::mutex registry_mutex;
+
 std::unordered_map<taskid_t, std::shared_ptr<Task>> tasks;
 
 std::atomic<taskid_t> next_id{1};
-std::atomic<bool> shutting_down{false};
+
+bool shutting_down = false;
 
 thread_local Task* current_task = nullptr;
 
-// Find a task without exposing the registry.
+// ------------------------------------------------------------
+// Registry lookup
+// ------------------------------------------------------------
+
 std::shared_ptr<Task> find_task(taskid_t id)
 {
     std::lock_guard<std::mutex> lock(registry_mutex);
@@ -38,45 +42,28 @@ std::shared_ptr<Task> find_task(taskid_t id)
     return it->second;
 }
 
-// Generate a nonzero, unused task ID.
-taskid_t generate_id()
+// ------------------------------------------------------------
+// ID allocation
+// ------------------------------------------------------------
+
+taskid_t generate_id_locked()
 {
+    // registry_mutex must be locked by the caller.
     for (;;) {
         taskid_t id = next_id.fetch_add(1);
 
         if (id == 0)
             continue;
 
-        std::lock_guard<std::mutex> lock(registry_mutex);
-
         if (tasks.find(id) == tasks.end())
             return id;
     }
 }
 
-// Join a worker without holding its task mutex.
-void join_worker(const std::shared_ptr<Task>& task)
-{
-    std::thread worker;
+// ------------------------------------------------------------
+// Task execution
+// ------------------------------------------------------------
 
-    {
-        std::lock_guard<std::mutex> lock(task->mutex);
-
-        if (!task->worker.joinable() || task->worker_joined)
-            return;
-
-        if (task->worker.get_id() == std::this_thread::get_id())
-            return;
-
-        task->worker_joined = true;
-        worker = std::move(task->worker);
-    }
-
-    if (worker.joinable())
-        worker.join();
-}
-
-// Execute the task.
 void execute_task(const std::shared_ptr<Task>& task)
 {
     current_task = task.get();
@@ -91,24 +78,43 @@ void execute_task(const std::shared_ptr<Task>& task)
         failed = true;
     }
 
-    // A cancellation request takes precedence over normal completion.
-    const bool cancelled =
-        task->cancel_requested.load(std::memory_order_acquire);
+    bool cancelled = false;
+
+    {
+        std::lock_guard<std::mutex> lock(task->mutex);
+
+        cancelled = task->cancel_requested.load(
+            std::memory_order_acquire
+        );
+
+        if (!cancelled)
+            task->finishing = true;
+    }
+
+    if (!cancelled && !failed && task->callee) {
+        try {
+            task->callee(result);
+        }
+        catch (...) {
+            failed = true;
+        }
+    }
+
+    if ((cancelled || failed) && result && task->deleter) {
+        try {
+            task->deleter(result);
+        }
+        catch (...) {
+        }
+
+        result = nullptr;
+    }
 
     {
         std::lock_guard<std::mutex> lock(task->mutex);
 
         if (cancelled) {
             task->state = State::Cancelled;
-
-            if (result && task->deleter) {
-                try {
-                    task->deleter(result);
-                }
-                catch (...) {
-                    // Destructors/deleters must not escape the worker.
-                }
-            }
         }
         else if (failed) {
             task->state = State::Failed;
@@ -119,28 +125,21 @@ void execute_task(const std::shared_ptr<Task>& task)
         }
     }
 
-    // The completion callback runs on the worker thread.
-    if (!cancelled && !failed && task->callee) {
-        try {
-            task->callee(result);
-        }
-        catch (...) {
-            // A callback exception must not terminate the process.
-        }
-    }
-
     current_task = nullptr;
     task->condition.notify_all();
 }
 
-// Submit a task.
+// ------------------------------------------------------------
+// Submission
+// ------------------------------------------------------------
+
 taskid_t submit(
     Calling call,
     Args args,
     Callee callee,
     ResultDeleter deleter)
 {
-    if (!call || shutting_down.load())
+    if (!call)
         return 0;
 
     auto task = std::make_shared<Task>();
@@ -149,47 +148,33 @@ taskid_t submit(
     task->args = args;
     task->callee = callee;
     task->deleter = deleter;
-    task->id = generate_id();
 
-    {
-        std::lock_guard<std::mutex> lock(registry_mutex);
+    std::lock_guard<std::mutex> lock(registry_mutex);
 
-        if (shutting_down.load())
-            return 0;
+    if (shutting_down)
+        return 0;
 
-        if (tasks.find(task->id) != tasks.end())
-            return 0;
+    task->id = generate_id_locked();
 
-        try {
-            task->worker = std::thread(execute_task, task);
-        }
-        catch (...) {
-            return 0;
-        }
+    // Register before starting the worker.
+    tasks.emplace(task->id, task);
 
-        tasks.emplace(task->id, task);
+    try {
+        std::thread worker(execute_task, task);
+        worker.detach();
+    }
+    catch (...) {
+        tasks.erase(task->id);
+        return 0;
     }
 
     return task->id;
 }
 
-} // namespace
-
-// ------------------------------------------------------------
-// Submit asynchronously
-// ------------------------------------------------------------
-
-taskid_t wait_for(
-    Calling call,
-    Args args,
-    Callee callee,
-    ResultDeleter deleter)
-{
-    return submit(call, args, callee, deleter);
 }
 
 // ------------------------------------------------------------
-// Wait for an existing task
+// Wait for completion
 // ------------------------------------------------------------
 
 int wait_for(taskid_t taskid)
@@ -210,8 +195,6 @@ int wait_for(taskid_t taskid)
         });
     }
 
-    join_worker(task);
-
     std::lock_guard<std::mutex> lock(task->mutex);
 
     switch (task->state) {
@@ -230,7 +213,20 @@ int wait_for(taskid_t taskid)
 }
 
 // ------------------------------------------------------------
-// Submit and wait with timeout
+// Public asynchronous submission
+// ------------------------------------------------------------
+
+taskid_t wait_for(
+    Calling call,
+    Args args,
+    Callee callee,
+    ResultDeleter deleter)
+{
+    return submit(call, args, callee, deleter);
+}
+
+// ------------------------------------------------------------
+// Timed submission and wait
 // ------------------------------------------------------------
 
 int wait_until(
@@ -248,17 +244,19 @@ int wait_until(
 
     taskid_t id = submit(call, args, callee, deleter);
 
-    if (!id)
-        return shutting_down.load()
+    if (!id) {
+        std::lock_guard<std::mutex> lock(registry_mutex);
+
+        return shutting_down
             ? E_TASK_SHUTTING_DOWN
             : E_TASK_FAILED;
+    }
 
     auto task = find_task(id);
 
     if (!task)
         return E_TASK_NOT_FOUND;
 
-    // Zero means wait forever.
     if (timeout == 0) {
         int status = wait_for(id);
 
@@ -276,13 +274,11 @@ int wait_until(
                     break;
             }
 
-            // Use TimeX sleep rather than std::chrono.
             tx::sleep::sleep_exact(0, 1);
-
             ++elapsed;
         }
 
-        bool finished = false;
+        bool finished;
 
         {
             std::lock_guard<std::mutex> lock(task->mutex);
@@ -292,9 +288,17 @@ int wait_until(
         if (!finished) {
             cancel(id);
 
-            // Join before returning: the task must no longer be
-            // accessing its arguments when wait_until returns.
-            join_worker(task);
+            // Wait for the worker to stop using its arguments.
+            {
+                std::unique_lock<std::mutex> lock(task->mutex);
+
+                task->condition.wait(lock, [&] {
+                    return task->state != State::Running;
+                });
+            }
+
+            // Delete if its result can be safely disposed of.
+            del_task(id);
 
             return E_TASK_TIMEOUT;
         }
@@ -306,6 +310,7 @@ int wait_until(
     }
 
     int error = 0;
+
     void* value = retrieve_result(id, &error);
 
     if (error != 0)
@@ -313,14 +318,13 @@ int wait_until(
 
     *result = value;
 
-    // The result has been transferred, so metadata can be removed.
     del_task(id);
 
     return 0;
 }
 
 // ------------------------------------------------------------
-// Retrieve result
+// Result retrieval
 // ------------------------------------------------------------
 
 void* retrieve_result(taskid_t taskid, int* e)
@@ -328,16 +332,21 @@ void* retrieve_result(taskid_t taskid, int* e)
     if (e)
         *e = 0;
 
-    auto task = find_task(taskid);
+    // Lock order: registry, then task.
+    std::lock_guard<std::mutex> registry_lock(registry_mutex);
 
-    if (!task) {
+    auto it = tasks.find(taskid);
+
+    if (it == tasks.end()) {
         if (e)
             *e = E_TASK_NOT_FOUND;
 
         return nullptr;
     }
 
-    std::lock_guard<std::mutex> lock(task->mutex);
+    auto task = it->second;
+
+    std::lock_guard<std::mutex> task_lock(task->mutex);
 
     if (task->state == State::Running) {
         if (e)
@@ -369,14 +378,14 @@ void* retrieve_result(taskid_t taskid, int* e)
 
     task->result_retrieved = true;
 
-    void* result = task->result;
+    void* value = task->result;
     task->result = nullptr;
 
-    return result;
+    return value;
 }
 
 // ------------------------------------------------------------
-// Request cancellation
+// Cancellation
 // ------------------------------------------------------------
 
 void cancel(taskid_t taskid)
@@ -386,31 +395,40 @@ void cancel(taskid_t taskid)
     if (!task)
         return;
 
-    task->cancel_requested.store(true, std::memory_order_release);
-    task->condition.notify_all();
+    std::lock_guard<std::mutex> lock(task->mutex);
+
+    if (task->state == State::Running && !task->finishing) {
+        task->cancel_requested.store(
+            true,
+            std::memory_order_release
+        );
+    }
 }
 
 // ------------------------------------------------------------
-// Delete completed task
+// Task deletion
 // ------------------------------------------------------------
 
 int del_task(taskid_t taskid)
 {
-    auto task = find_task(taskid);
-
-    if (!task)
-        return E_TASK_NOT_FOUND;
-
-    if (current_task == task.get())
-        return E_TASK_DEADLOCK;
-
-    join_worker(task);
-
     void* result = nullptr;
     ResultDeleter deleter = nullptr;
 
     {
-        std::lock_guard<std::mutex> lock(task->mutex);
+        // Lock order: registry, then task.
+        std::lock_guard<std::mutex> registry_lock(registry_mutex);
+
+        auto it = tasks.find(taskid);
+
+        if (it == tasks.end())
+            return E_TASK_NOT_FOUND;
+
+        auto task = it->second;
+
+        if (current_task == task.get())
+            return E_TASK_DEADLOCK;
+
+        std::lock_guard<std::mutex> task_lock(task->mutex);
 
         if (task->state == State::Running)
             return E_TASK_NOT_FINISHED;
@@ -422,6 +440,8 @@ int del_task(taskid_t taskid)
         deleter = task->deleter;
 
         task->result = nullptr;
+
+        tasks.erase(it);
     }
 
     if (result && deleter) {
@@ -429,28 +449,23 @@ int del_task(taskid_t taskid)
             deleter(result);
         }
         catch (...) {
-            // Ignore exceptions from cleanup.
+            // Ignore cleanup exceptions.
         }
     }
-
-    std::lock_guard<std::mutex> lock(registry_mutex);
-
-    auto it = tasks.find(taskid);
-
-    if (it != tasks.end() && it->second == task)
-        tasks.erase(it);
 
     return 0;
 }
 
 // ------------------------------------------------------------
-// Check cancellation from inside a task
+// Cooperative cancellation query
 // ------------------------------------------------------------
 
 bool cancellation_requested()
 {
     return current_task &&
-        current_task->cancel_requested.load(std::memory_order_acquire);
+        current_task->cancel_requested.load(
+            std::memory_order_acquire
+        );
 }
 
 // ------------------------------------------------------------
@@ -462,43 +477,68 @@ int shutdown()
     if (current_task)
         return E_TASK_DEADLOCK;
 
-    shutting_down.store(true);
-
     std::vector<std::shared_ptr<Task>> snapshot;
 
     {
         std::lock_guard<std::mutex> lock(registry_mutex);
 
-        for (auto& [id, task] : tasks) {
-            (void)id;
-            snapshot.push_back(task);
-        }
+        shutting_down = true;
+
+        for (auto& entry : tasks)
+            snapshot.push_back(entry.second);
     }
 
-    for (auto& task : snapshot) {
-        task->cancel_requested.store(true);
-        task->condition.notify_all();
-    }
-
-    for (auto& task : snapshot) {
-        if (current_task == task.get())
-            continue;
-
-        join_worker(task);
-    }
-
-    int result = 0;
-
+    // Request cancellation.
     for (auto& task : snapshot) {
         std::lock_guard<std::mutex> lock(task->mutex);
 
-        if (task->result && !task->deleter) {
-            result = E_TASK_RESULT_NOT_RETRIEVED;
+        if (task->state == State::Running) {
+            task->cancel_requested.store(
+                true,
+                std::memory_order_release
+            );
         }
     }
 
-    if (result != 0)
-        return result;
+    // Wait for every worker to finish.
+    for (auto& task : snapshot) {
+        std::unique_lock<std::mutex> lock(task->mutex);
+
+        task->condition.wait(lock, [&] {
+            return task->state != State::Running;
+        });
+    }
+
+    // Clean up results and registry.
+    for (auto& task : snapshot) {
+        std::lock_guard<std::mutex> lock(task->mutex);
+
+        if (task->result && !task->deleter)
+            return E_TASK_RESULT_NOT_RETRIEVED;
+    }
+
+    for (auto& task : snapshot) {
+        void* result = nullptr;
+        ResultDeleter deleter = nullptr;
+
+        {
+            std::lock_guard<std::mutex> lock(task->mutex);
+
+            result = task->result;
+            deleter = task->deleter;
+
+            task->result = nullptr;
+        }
+
+        if (result && deleter) {
+            try {
+                deleter(result);
+            }
+            catch (...) {
+                // Ignore cleanup exceptions.
+            }
+        }
+    }
 
     {
         std::lock_guard<std::mutex> lock(registry_mutex);
