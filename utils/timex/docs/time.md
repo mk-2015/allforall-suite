@@ -171,3 +171,146 @@ int main() {
     }
 }
 ```
+
+---
+
+## `tx::time` Namespace Utilities
+
+The `tx::time` namespace provides helper functions for retrieving the current system time in various representations and time types (`UTC`, `GMT`, `UNIX`, `Local`), as well as advanced formatting utilities supporting custom tokens and printf-style variadic formatting.
+
+### Namespace Synopsis
+
+```cpp
+namespace tx::time {
+
+enum class TimeType {
+    UTC,
+    GMT,
+    UNIX,
+    Local
+};
+
+// Current time retrieval
+tx::Second time_now(TimeType type = TimeType::UTC);
+tx::Nanosecond time_now_ns(TimeType type = TimeType::UTC);
+tx::Time time_now_time(TimeType type = TimeType::UTC);
+tx::Timedate time_now_timedate(TimeType type = TimeType::UTC);
+
+// Formatting functions
+std::string time_format(
+    tx::Timedate* time,
+    const std::string& format,
+    TimeType type, ...
+);
+
+std::string time_format(
+    tx::Time* time,
+    const std::string& format,
+    TimeType type, ...
+);
+
+std::string time_format(
+    tx::Date* time,
+    const std::string& format,
+    TimeType type, ...
+);
+
+std::string time_format(
+    tx::Second* time,
+    const std::string& format,
+    TimeType type, ...
+);
+
+std::string time_format_ns(
+    tx::Nanosecond* time,
+    const std::string& format,
+    TimeType type = TimeType::UTC, ...
+);
+
+}
+```
+
+---
+
+### `TimeType` Enumeration
+
+Defines the time base / standard used when querying current time or formatting timestamps:
+
+| Enumerator | Description |
+| :--- | :--- |
+| `TimeType::UTC` | Coordinated Universal Time. |
+| `TimeType::GMT` | Greenwich Mean Time. |
+| `TimeType::UNIX` | Unix epoch time. |
+| `TimeType::Local` | Local system time zone. |
+
+---
+
+### Current Time Functions Reference
+
+| Signature | Return Type | Description |
+| :--- | :--- | :--- |
+| `time_now(TimeType type)` | `tx::Second` | Returns current elapsed seconds according to the specified `TimeType`. |
+| `time_now_ns(TimeType type)` | `tx::Nanosecond` | Returns current elapsed nanoseconds according to the specified `TimeType`. |
+| `time_now_time(TimeType type)` | `tx::Time` | Returns current time of day (`tx::Time`) according to the specified `TimeType`. |
+| `time_now_timedate(TimeType type)` | `tx::Timedate` | Returns current combined date and time (`tx::Timedate`) according to the specified `TimeType`. |
+
+---
+
+### Formatting Tokens
+
+`time_format` and `time_format_ns` support the following specialized formatting tokens:
+
+| Token | Description | Format / Range |
+| :--- | :--- | :--- |
+| `%Y` | Year | 4-digit year (e.g., `2026`) |
+| `%y` | Year (2 digits) | 2-digit year (e.g., `26`) |
+| `%m` | Month | `01` – `12` |
+| `%d` | Day | `01` – `31` |
+| `%H` | Hour (24-hour) | `00` – `23` |
+| `%I` | Hour (12-hour) | `01` – `12` |
+| `%M` | Minute | `00` – `59` |
+| `%S` | Second | `00` – `59` |
+| `%MS` | Millisecond | `000` – `999` |
+| `%f` | Microsecond | `000000` – `999999` |
+| `%N` | Nanosecond | `000000000` – `999999999` |
+| `%p` | AM/PM | `AM` or `PM` |
+
+Remaining printf-style conversions (e.g. `%s`, `%d`, etc.) use variadic arguments passed to `time_format`.
+
+---
+
+### Formatting Functions Reference
+
+| Signature | Return Type | Description |
+| :--- | :--- | :--- |
+| `time_format(tx::Timedate* time, const std::string& format, TimeType type, ...)` | `std::string` | Formats a `Timedate` pointer using custom tokens and optional variadic arguments. |
+| `time_format(tx::Time* time, const std::string& format, TimeType type, ...)` | `std::string` | Formats a `Time` pointer using custom tokens and optional variadic arguments. |
+| `time_format(tx::Date* time, const std::string& format, TimeType type, ...)` | `std::string` | Formats a `Date` pointer using custom tokens and optional variadic arguments. |
+| `time_format(tx::Second* time, const std::string& format, TimeType type, ...)` | `std::string` | Formats a `Second` timestamp pointer using custom tokens and optional variadic arguments. |
+| `time_format_ns(tx::Nanosecond* time, const std::string& format, TimeType type = TimeType::UTC, ...)` | `std::string` | Formats a `Nanosecond` timestamp pointer using custom tokens and optional variadic arguments. |
+
+---
+
+### Example Usage (`tx::time`)
+
+```cpp
+#include <tx/tx.hpp>
+#include <tx/time.hpp>
+#include <iostream>
+
+int main() {
+    using namespace tx;
+
+    // Get current time as a Timedate object in UTC
+    Timedate now_utc = time::time_now_timedate(time::TimeType::UTC);
+
+    // Format current time using custom tokens
+    std::string formatted = time::time_format(
+        &now_utc,
+        "Current UTC: %Y-%m-%d %H:%M:%S.%MS (%p)",
+        time::TimeType::UTC
+    );
+
+    std::cout << formatted << "\n";
+}
+```

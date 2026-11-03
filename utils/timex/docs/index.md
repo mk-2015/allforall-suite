@@ -7,7 +7,7 @@
 ## Navigation
 
 - **Classes & Subsystems**
-  - [`tx::Time`](./time.md) — Time of day with nanosecond precision
+  - [`tx::Time` & `tx::time`](./time.md) — Time of day and current time/formatting utilities
   - [`tx::Date`](./date.md) — Calendar date (Year, Month, Day) with leap year support
   - [`tx::Timedate`](./timedate.md) — Combined date and time representation
   - [`tx::sleep`](./sleep.md) — Cross-platform precision sleep utilities
