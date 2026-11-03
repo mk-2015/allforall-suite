@@ -16,7 +16,7 @@ using Second      = std::uint64_t;
 using Millisecond = std::uint64_t;
 using Microsecond = std::uint64_t;
 using Nanosecond  = std::uint64_t;
-
+using Offset      = std::int64_t;
 
 // ============================================
 // Time

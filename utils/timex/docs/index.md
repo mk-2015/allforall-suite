@@ -11,6 +11,7 @@
   - [`tx::Date`](./date.md) — Calendar date (Year, Month, Day) with leap year support
   - [`tx::Timedate`](./timedate.md) — Combined date and time representation
   - [`tx::sleep`](./sleep.md) — Cross-platform precision sleep utilities
+  - [`tx::zone`](./zones.md) — ICU-backed timezone management and querying
 - **Reference**
   - [Type Aliases](#type-aliases)
   - [Quick Start](#quick-start)

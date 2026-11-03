@@ -1,8 +1,11 @@
 CXX = g++
 AR  = ar
 
-CXXFLAGS = -std=c++20 -Wall -Wextra -Wpedantic -O2 -fPIC -Isrc/
-CPPFLAGS = -Iinclude
+ICU_CFLAGS := $(shell pkg-config --cflags icu-i18n)
+ICU_LIBS   := $(shell pkg-config --libs icu-i18n icu-uc)
+
+CXXFLAGS = -std=c++20 -Wall -Wextra -Wpedantic -O2 -fPIC -Isrc/ -D_A
+CPPFLAGS = -Iinclude $(ICU_CFLAGS)
 
 SRC = src
 OBJ = obj
@@ -31,7 +34,7 @@ $(STATIC): $(OBJECTS)
 $(SHARED): $(OBJECTS)
 	@mkdir -p $(LIB)
 	@echo " [LINK] $@"
-	@$(CXX) -shared -o $@ $^
+	@$(CXX) -shared -o $@ $^ $(ICU_CFLAGS) $(ICU_LIBS)
 
 clean:
 	@rm -rf $(OBJ) $(LIB)
