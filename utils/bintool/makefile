@@ -31,7 +31,7 @@ LINKFLAGS :=
 
 ifeq ($(OS_TYPE),LINUX)
     CCFLAGS   += -pthread
-    LINKFLAGS += -pthread -lcrypt -lcapstone -lLIEF
+    LINKFLAGS += -pthread -lcrypto -lcapstone -lLIEF
 else ifeq ($(OS_TYPE),BSD)
     CCFLAGS   += -pthread
     LINKFLAGS += -pthread -lcrypto -lcapstone -lLIEF

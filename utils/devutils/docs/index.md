@@ -16,3 +16,5 @@ Welcome to the coreutils documentation.
 - [nothing Documentation](nothing.md)
 - [serve Documentation](serve.md)
 - [var Documentation](var.md)
+- [bsg Documentation](bsg.md)
+- [setvolume Documentation](setvolume.md)
