@@ -31,12 +31,12 @@ LINKFLAGS :=
 
 ifeq ($(OS_TYPE),LINUX)
     CCFLAGS   += -pthread $(shell pkg-config --cflags gtk+-3.0)
-    LINKFLAGS += -pthread $(shell pkg-config --libs gtk+-3.0)
+    LINKFLAGS += -pthread -lssl -lcrypto $(shell pkg-config --libs gtk+-3.0)
 else ifeq ($(OS_TYPE),BSD)
     CCFLAGS   += -pthread $(shell pkg-config --cflags gtk+-3.0)
-    LINKFLAGS += -pthread $(shell pkg-config --libs gtk+-3.0)
+    LINKFLAGS += -pthread -lssl -lcrypto $(shell pkg-config --libs gtk+-3.0)
 else ifneq ($(filter $(OS_TYPE),WINDOWS MSYS),)
-    LINKFLAGS += -lws2_32 -lole32 -luuid lcomctl32
+    LINKFLAGS += -lws2_32 -lssl -lcrypto -lole32 -luuid lcomctl32 -lntdll0
 endif
 
 SOURCES   := $(wildcard $(SRC)/*.cpp)

@@ -7,8 +7,6 @@
 namespace fs = std::filesystem;
 
 int main(int argc, char *argv[]) {
-  std::cout << "mk-2015 (C) allforall tools, fwipe tool\n";
-
   std::string filename = "GNU_IS-NOT-UNIX.like_linux";
 
   for (int i = 1; i < argc; i++) {

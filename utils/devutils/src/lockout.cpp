@@ -80,8 +80,6 @@ void _sleep(double milliseconds) {
 }
 
 int main(int argc, char* argv[]) {
-    std::cout << "mk-2015 (C) allforall tools, Lockout tool\n";
-
 	int is_sleep = 0;
 	double sleep_time = 0.0;
 	int shutdown = 0;

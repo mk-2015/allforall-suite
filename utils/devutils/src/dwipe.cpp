@@ -34,7 +34,6 @@ void wipeFileContents(const fs::path &filePath) {
 }
 
 int main(int argc, char *argv[]) {
-  std::cout << "mk-2015 (C) allforall tools, dwipe\n";
   fs::path targetDir = "unknown";
 
   for (int i = 1; i < argc; i++) {

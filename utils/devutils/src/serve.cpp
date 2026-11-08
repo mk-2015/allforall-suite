@@ -7,8 +7,6 @@
 
 int main(int argc, char* argv[])
 {
-    std::cout << "mk-2015 (C) allforall tools, Serve tool\n";
-    
     int is_http = 1;
     int port = 8080;
 	int cors_enabled = 0;

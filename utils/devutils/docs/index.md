@@ -18,3 +18,5 @@ Welcome to the coreutils documentation.
 - [var Documentation](var.md)
 - [bsg Documentation](bsg.md)
 - [setvolume Documentation](setvolume.md)
+- [psinfo Documentation](psinfo.md)
+- [watchd Documentation](watchd.md)

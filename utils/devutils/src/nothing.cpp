@@ -26,13 +26,6 @@ void _sleep(double milliseconds) {
 }
 
 int main(int argc, char* argv[]) {
-    if (argc > 0) {
-        std::string_view prog_name = argv[0];
-        if (prog_name.find("nothing-copyright") != std::string_view::npos) {
-            std::cout << "mk-2015 (C) allforall tools, Nothing tool\n";
-        }
-    }
-
     double time = -1.0;
     int exit_code = 0;
 
