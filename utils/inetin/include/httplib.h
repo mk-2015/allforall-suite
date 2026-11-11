@@ -8,8 +8,8 @@
 #ifndef CPPHTTPLIB_HTTPLIB_H
 #define CPPHTTPLIB_HTTPLIB_H
 
-#define CPPHTTPLIB_VERSION "0.65.0"
-#define CPPHTTPLIB_VERSION_NUM "0x004100"
+#define CPPHTTPLIB_VERSION "0.66.0"
+#define CPPHTTPLIB_VERSION_NUM "0x004200"
 
 #ifdef _WIN32
 #if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0A00
@@ -12638,7 +12638,16 @@ inline bool ThreadPool::enqueue(std::function<void()> fn) {
     if (jobs_.size() > idle_thread_count_ &&
         threads_.size() + dynamic_threads_.size() < max_thread_count_) {
       cleanup_finished_threads();
-      dynamic_threads_.emplace_back(std::thread([this]() { worker(true); }));
+#ifndef CPPHTTPLIB_NO_EXCEPTIONS
+      try {
+#endif
+        dynamic_threads_.emplace_back(std::thread([this]() { worker(true); }));
+#ifndef CPPHTTPLIB_NO_EXCEPTIONS
+      } catch (const std::system_error &) {
+        // No thread budget left: keep the job queued for an existing worker
+        // instead of letting the exception escape the accept loop.
+      }
+#endif
     }
   }
 

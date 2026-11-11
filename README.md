@@ -4,9 +4,11 @@
 
 ## Dependencies
 
-- **devutils:**
+- **devutils**
   - [cpp-httplib](https://github.com/yhirose/cpp-httplib)
   - Boost.Multiprecision
+- **textutils:**
+  - Standard C++20 Library (pthread)
 - **inetin:**
   - Boost.Asio
   - c-ares
@@ -20,7 +22,6 @@
 
 - An open-source tool library for OS administrators.
 - Written in C++ for blazing-fast applications and code readability, welcoming contributors.
-- A massive toolkit (coming soon...).
 
 ## Build & Installation
 
@@ -71,6 +72,10 @@ shutdown /r /t 0
 ## devutils
 
 - See [devutils docs](./utils//devutils//docs/index.md).
+
+## textutils
+
+- See [textutils docs](./utils/textutils/docs/index.md).
 
 ## inetin
 

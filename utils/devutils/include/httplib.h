@@ -8,8 +8,8 @@
 #ifndef CPPHTTPLIB_HTTPLIB_H
 #define CPPHTTPLIB_HTTPLIB_H
 
-#define CPPHTTPLIB_VERSION "0.64.0"
-#define CPPHTTPLIB_VERSION_NUM "0x004000"
+#define CPPHTTPLIB_VERSION "0.66.0"
+#define CPPHTTPLIB_VERSION_NUM "0x004200"
 
 #ifdef _WIN32
 #if defined(_WIN32_WINNT) && _WIN32_WINNT < 0x0A00
@@ -1029,18 +1029,27 @@ inline std::string resolve_relative_location(const std::string &location,
   // A ':' in the first segment means the value has a scheme.
   if (location.find(':') < location.find_first_of("/?#")) { return location; }
 
-  if (location[0] == '#') { return base.substr(0, base.find('#')) + location; }
+  // A path starting with "//" would be re-parsed as an authority. Prefix "/."
+  // (as the URL Standard does); remove_dot_segments strips it later.
+  auto on_this_host = [](std::string path) -> std::string {
+    if (path.compare(0, 2, "//") == 0) { path.insert(0, "/."); }
+    return path;
+  };
+
+  if (location[0] == '#') {
+    return on_this_host(base.substr(0, base.find('#')) + location);
+  }
 
   auto base_path = base.substr(0, base.find_first_of("?#"));
-  if (location[0] == '?') { return base_path + location; }
+  if (location[0] == '?') { return on_this_host(base_path + location); }
 
   if (base_path.empty() || base_path[0] != '/') { base_path = "/"; }
   auto merged = base_path.substr(0, base_path.rfind('/') + 1) + location;
 
   // Remove "." and ".." segments from the merged path.
   auto path_end = (std::min)(merged.find_first_of("?#"), merged.size());
-  return remove_dot_segments(merged.substr(0, path_end)) +
-         merged.substr(path_end);
+  return on_this_host(remove_dot_segments(merged.substr(0, path_end)) +
+                      merged.substr(path_end));
 }
 
 } // namespace detail
@@ -9343,6 +9352,7 @@ inline bool redirect(T &cli, Request &req, Response &res,
                      Error &error) {
   Request new_req = req;
   new_req.path = path;
+  new_req.params.clear();
   new_req.redirect_count_ -= 1;
 
   if (res.status == StatusCode::SeeOther_303 &&
@@ -12628,7 +12638,16 @@ inline bool ThreadPool::enqueue(std::function<void()> fn) {
     if (jobs_.size() > idle_thread_count_ &&
         threads_.size() + dynamic_threads_.size() < max_thread_count_) {
       cleanup_finished_threads();
-      dynamic_threads_.emplace_back(std::thread([this]() { worker(true); }));
+#ifndef CPPHTTPLIB_NO_EXCEPTIONS
+      try {
+#endif
+        dynamic_threads_.emplace_back(std::thread([this]() { worker(true); }));
+#ifndef CPPHTTPLIB_NO_EXCEPTIONS
+      } catch (const std::system_error &) {
+        // No thread budget left: keep the job queued for an existing worker
+        // instead of letting the exception escape the accept loop.
+      }
+#endif
     }
   }
 
@@ -12867,7 +12886,8 @@ inline ssize_t SocketStream::read(char *ptr, size_t size) {
 inline ssize_t SocketStream::write(const char *ptr, size_t size) {
   if (!wait_writable()) { return -1; }
 
-#if defined(_WIN32) && !defined(_WIN64)
+  // Winsock's send() takes an int length, even on 64-bit Windows
+#ifdef _WIN32
   size =
       (std::min)(size, static_cast<size_t>((std::numeric_limits<int>::max)()));
 #endif
@@ -13082,14 +13102,22 @@ make_host_and_port_string_always_port(const std::string &host, int port) {
   return prepare_host_string(host) + ":" + std::to_string(port);
 }
 
+// Where a client connects for `host`, as one string: the mapped address or
+// name, or `host` itself.
+inline std::string
+addr_map_target(const std::map<std::string, std::string> &addr_map,
+                const std::string &host) {
+  std::string connect_host;
+  std::string ip;
+  apply_addr_map(addr_map, host, connect_host, ip);
+  return ip.empty() ? connect_host : ip;
+}
+
 // Request target of a CONNECT for `host`, with `addr_map` applied.
 inline std::string
 make_connect_request_target(const std::map<std::string, std::string> &addr_map,
                             const std::string &host, int port) {
-  std::string connect_host;
-  std::string ip;
-  apply_addr_map(addr_map, host, connect_host, ip);
-  return make_host_and_port_string_always_port(ip.empty() ? connect_host : ip,
+  return make_host_and_port_string_always_port(addr_map_target(addr_map, host),
                                                port);
 }
 
@@ -15282,7 +15310,10 @@ Server::process_request(Stream &strm, const std::string &remote_addr,
   if ((req.method == "GET" || req.method == "HEAD") &&
       req.has_header("Range")) {
     const auto &range_header_value = req.get_header_value("Range");
-    if (!detail::parse_range_header(range_header_value, req.ranges)) {
+    // RFC 9110 14.2: a range unit other than bytes must be ignored
+    auto unit = range_header_value.substr(0, range_header_value.find('='));
+    if (detail::case_ignore::equal(unit, "bytes") &&
+        !detail::parse_range_header(range_header_value, req.ranges)) {
       connection_closed = true;
       res.status = StatusCode::RangeNotSatisfiable_416;
       output_error_log(Error::InvalidRangeHeader, &req);
@@ -16474,8 +16505,13 @@ inline bool ClientImpl::redirect(Request &req, Response &res, Error &error) {
 
   auto path = std::move(next_path) + next_query;
 
+  // A Unix socket client sends "Host: localhost", so a Location naming
+  // localhost names this client too.
+  auto is_same_host = next_host == host_ ||
+                      (address_family_ == AF_UNIX && next_host == "localhost");
+
   // Same host redirect - use current client
-  if (next_scheme == scheme && next_host == host_ && next_port == port_) {
+  if (next_scheme == scheme && is_same_host && next_port == port_) {
     return detail::redirect(*this, req, res, path, location, error);
   }
 
@@ -16626,6 +16662,14 @@ inline void ClientImpl::setup_redirect_client(ClientType &client) {
   // Copy network and socket settings
   client.addr_map_ = addr_map_;
   client.tunnel_addr_map_ = tunnel_addr_map_;
+
+  // A Unix socket client reaches every host through its own socket, as curl's
+  // --unix-socket does, unless the caller mapped that host elsewhere. The
+  // Location's host is never taken as a socket path.
+  if (address_family_ == AF_UNIX) {
+    auto &target = client.addr_map_[client.host()];
+    if (target.empty()) { target = detail::addr_map_target(addr_map_, host_); }
+  }
   client.set_address_family(address_family_);
   client.set_tcp_nodelay(tcp_nodelay_);
   client.set_ipv6_v6only(ipv6_v6only_);
@@ -23045,6 +23089,9 @@ inline ssize_t read(session_t session, void *buf, size_t len, TlsError &err) {
   }
 
   auto wsession = static_cast<impl::WolfSSLSession *>(session);
+  constexpr auto max_len =
+      static_cast<size_t>((std::numeric_limits<int>::max)());
+  if (len > max_len) { len = max_len; }
   int ret = wolfSSL_read(wsession->ssl, buf, static_cast<int>(len));
 
   if (ret > 0) {
