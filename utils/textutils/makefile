@@ -62,12 +62,12 @@ deps:
 
 $(BIN)/%: $(OBJ)/%.o
 	@mkdir -p $(BIN)
-	@echo " [LINK] $< -> $@"
+	@echo "[LINK] $< -> $@"
 	@$(CC) $< $(LINKFLAGS) -o $@
 
 $(OBJ)/%.o: $(SRC)/%.cpp
 	@mkdir -p $(OBJ)
-	@echo " [CC] $<"
+	@echo "[CC] $<"
 	@$(CC) $(CCFLAGS) -c $< -o $@
 
 clean:

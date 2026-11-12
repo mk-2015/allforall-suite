@@ -6,4 +6,5 @@ Welcome to the textutils documentation.
 - [fill Documentation](fill.md)
 - [kp Documentation](kp.md)
 - [parg Documentation](parg.md)
+- [seco Documentation](seco.md)
 - [textformat Documentation](textformat.md)
