@@ -17,6 +17,9 @@
   - OpenSSL (system)
   - libCapstone
   - [LIEF](https://lief-project.github.io/) (system)
+- **pmake:**
+  - toml++
+  - CLI11 
 
 ## AllForAll
 
@@ -80,6 +83,10 @@ shutdown /r /t 0
 ## inetin
 
 - See [inetin docs](./utils/inetin/docs/index.md)
+
+## PMAKE
+
+- See [PMAKE docs](./utils/pmake/docs/index.md)
 
 ## TimeX C++ Library
 

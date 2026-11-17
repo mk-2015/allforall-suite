@@ -1,0 +1,19 @@
+[package]
+name = "caffeinate"
+version = "1.0.0"
+release = 2
+description = "Command to stop your computer from going to sleep or locking screen"
+architecture = "x86_64"
+license = ["GPL-3.0-or-later"]
+
+[build]
+jobs = 4
+directory = "build"
+output = "pkg"
+
+[build.source1]
+name = "caffeinate"
+version = "1.0.0"
+source = "https://github.com/garsaud/caffeinate/archive/refs/tags/v1.0.0.tar.gz"
+main = true
+build_system = "make"

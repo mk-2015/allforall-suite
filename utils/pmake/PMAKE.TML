@@ -1,0 +1,26 @@
+[package]
+name = "example-pkg"
+version = "1.0.0"
+release = 1
+description = "Example package for PMAKE"
+architecture = "x86_64"
+license = ["MIT"]
+
+[build]
+jobs = 4
+directory = "build"
+output = "pkg"
+
+[build.source1]
+name = "library-a"
+version = "1.0.0"
+source = "https://example.com/library-a.tar.gz"
+main = false
+build_system = "make"
+
+[build.source2]
+name = "example"
+version = "1.0.0"
+source = "https://example.com/example.tar.gz"
+main = true
+build_system = "make"
