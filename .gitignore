@@ -27,3 +27,5 @@ mpv-test.noinclude.json
 test-*.sh
 test.cpp
 bin
+toml++
+CLI
